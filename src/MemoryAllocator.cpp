@@ -15,11 +15,14 @@ void MemoryAllocator::init_memory() {
 	
 	mem->prev = mem->next = nullptr;
 	mem->size = (size_t)((char*)HEAP_END_ADDR - (char*)HEAP_START_ADDR - MEM_BLOCK_SIZE);
+	mem->status = FREE;
 }
 
 void *MemoryAllocator::alloc(size_t sz) {
 	// padding for block size
-	sz += (sz % MEM_BLOCK_SIZE);
+	sz = (sz % MEM_BLOCK_SIZE == 0) ?
+			sz :
+			(sz / MEM_BLOCK_SIZE + 1) * MEM_BLOCK_SIZE;
 	
 	
 	for (MemDescr *curr = free; curr; curr = curr->next) {
@@ -31,7 +34,7 @@ void *MemoryAllocator::alloc(size_t sz) {
 		else if (curr->size > sz) { // ako nije tačna, napravi novi segment posle sz prostora, i ubaci ga u free listu
 			remove(&free, curr);
 			
-			MemDescr *n = (MemDescr*)(MEM_BLOCK_SIZE + curr + sz);
+			MemDescr *n = (MemDescr*)((char*)curr + MEM_BLOCK_SIZE + sz);
 			n->size = (curr->size - sz - MEM_BLOCK_SIZE);
 			n->next = n->prev = nullptr;
 			
