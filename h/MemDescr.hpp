@@ -1,0 +1,24 @@
+//
+// Created by djafere on 5/9/22.
+//
+
+#ifndef _mem_descr_h
+#define _mem_descr_h
+
+#include "../lib/hw.h"
+
+typedef struct MemDescr {
+	size_t size;
+	struct MemDescr *next, *prev;
+	
+//	MemDescr(size_t sz, MemDescr *next=nullptr, MemDescr *prev=nullptr) : size(sz), next(next), prev(prev) {};
+	
+} MemDescr;
+
+void insert(MemDescr **head_ptr, MemDescr *node);
+void remove(MemDescr **head_ptr, MemDescr *node);
+
+void squash(MemDescr *free);
+
+
+#endif //_mem_descr_h
