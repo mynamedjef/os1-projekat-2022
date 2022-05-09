@@ -27,4 +27,10 @@ void remove(MemDescr **head_ptr, MemDescr *node);
 void squash(MemDescr *free);
 
 
+// for debugging purposes
+void print_node(MemDescr *node);
+void print_int(size_t);
+void print_string(const char *);
+
+
 #endif //_mem_descr_h

@@ -63,4 +63,13 @@ int MemoryAllocator::mem_free(void *ptr)
 }
 
 
-
+// for debugging purposes
+void MemoryAllocator::print_descr(MemDescr *mem)
+{
+	for (MemDescr *curr = mem; curr; curr = curr->next) {
+		print_node(curr);
+		__putc('\n');
+	}
+}
+void MemoryAllocator::prfree() { print_descr(free); }
+void MemoryAllocator::proccupied() { print_descr(occupied); }

@@ -4,6 +4,7 @@
 
 
 #include "../h/MemDescr.hpp"
+#include "../lib/console.h"
 
 
 void insert(MemDescr **head_ptr, MemDescr *node, MemChunkStatus st)
@@ -92,4 +93,41 @@ void squash(MemDescr *free)
 			curr->next->prev = curr;
 	}
 	return;
+}
+
+void print_node(MemDescr *node)
+{
+	print_string("nnode:\t\0");
+	print_int((unsigned long)node);
+	print_string("\nnext:\t\0");
+	print_int((unsigned long)node->next);
+	print_string("\nprev:\t\0");
+	print_int((unsigned long)node->prev);
+	print_string("\nsize:\t\0");
+	print_int(node->size);
+	print_string("\nstat:\t\0");
+	print_int(node->status);
+	__putc('\n');
+}
+void print_int(size_t s) {
+	const int SIZE = 64;
+	char c[SIZE];
+	int i = 0;
+	while (s) {
+		c[SIZE-i-1] = (s % 10) + '0';
+		i++;
+		
+		s /= 10;
+	}
+	
+	for (int j = 0; j < i; j++) {
+		__putc(c[SIZE-i+j]);
+	}
+	
+	__putc('\n');
+}
+void print_string(const char *c) {
+	while (*(c++)) {
+		__putc(*c);
+	}
 }

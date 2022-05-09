@@ -17,6 +17,11 @@ public:
 	static int mem_free(void*);
 	static void init_memory();
 	
+	// for debugging purposes
+	static void print_descr(MemDescr*);
+	static void prfree();
+	static void proccupied();
+	
 };
 
 
