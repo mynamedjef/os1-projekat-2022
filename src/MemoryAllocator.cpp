@@ -9,6 +9,7 @@ MemDescr *MemoryAllocator::free = nullptr;
 MemDescr *MemoryAllocator::occupied = nullptr;
 
 void MemoryAllocator::init_memory() {
+	// inicijalizacija početnog slobodnog segmenta
 	free = (MemDescr*)HEAP_START_ADDR;
 	MemDescr *mem = free;
 	
@@ -22,12 +23,12 @@ void *MemoryAllocator::alloc(size_t sz) {
 	
 	
 	for (MemDescr *curr = free; curr; curr = curr->next) {
-		if (curr->size == sz) {
+		if (curr->size == sz) { // ako je tačna veličina segmenta, samo prebaci iz free u occupied listu
 			remove(&free, curr);
-			insert(&occupied, curr);
+			insert(&occupied, curr, ALLOCATED);
 			return (void*)((char*)(curr) + MEM_BLOCK_SIZE);
 		}
-		else if (curr->size > sz) {
+		else if (curr->size > sz) { // ako nije tačna, napravi novi segment posle sz prostora, i ubaci ga u free listu
 			remove(&free, curr);
 			
 			MemDescr *n = (MemDescr*)(MEM_BLOCK_SIZE + curr + sz);
@@ -35,13 +36,30 @@ void *MemoryAllocator::alloc(size_t sz) {
 			n->next = n->prev = nullptr;
 			
 			curr->size = sz;
-			insert(&free, n);
-			insert(&occupied, curr);
+			insert(&free, n, FREE);
+			insert(&occupied, curr, ALLOCATED);
 			return (void*)((char*)(curr) + MEM_BLOCK_SIZE);
 		}
 	}
 	
+	// nije našao adekvatan segment, vrati nullptr
 	return nullptr;
+}
+
+int MemoryAllocator::mem_free(void *ptr)
+{
+	if (!ptr)
+		return -1;
+	MemDescr *mem = (MemDescr*)((char*)(ptr) - MEM_BLOCK_SIZE);
+	if (mem->status != ALLOCATED) // nije alociran segment
+		return -1;
+	
+	// skloni segment iz okupiranih, ubaci u slobodne i squash-uj
+	remove(&occupied, mem);
+	insert(&free, mem, FREE);
+	squash(mem);
+	
+	return 0;
 }
 
 
