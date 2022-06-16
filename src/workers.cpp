@@ -15,7 +15,7 @@ void workerBodyA()
         printString("\n");
         for (uint64 j = 0; j < 10000; j++)
         {
-            for (uint64 k = 0; k < 30000; k++)
+            for (uint64 k = 0; k < 10000; k++)
             {
                 // busy wait
             }
@@ -34,7 +34,7 @@ void workerBodyB()
         printString("\n");
         for (uint64 j = 0; j < 10000; j++)
         {
-            for (uint64 k = 0; k < 30000; k++)
+            for (uint64 k = 0; k < 10000; k++)
             {
                 // busy wait
             }
