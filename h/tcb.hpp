@@ -31,9 +31,9 @@ public:
 private:
     TCB(Body body, uint64 timeSlice) :
             body(body),
-            stack(body != nullptr ? new uint64[STACK_SIZE] : nullptr),
+            stack(body != nullptr ? new uint64[DEFAULT_STACK_SIZE] : nullptr),
             context({(uint64) &threadWrapper,
-                     stack != nullptr ? (uint64) &stack[STACK_SIZE] : 0
+                     stack != nullptr ? (uint64) &stack[DEFAULT_STACK_SIZE] : 0
                     }),
             timeSlice(timeSlice),
             finished(false)
@@ -62,9 +62,6 @@ private:
     static void dispatch();
 
     static uint64 timeSliceCounter;
-
-    static uint64 constexpr STACK_SIZE = 1024;
-    static uint64 constexpr TIME_SLICE = 2;
 };
 
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_TCB_HPP

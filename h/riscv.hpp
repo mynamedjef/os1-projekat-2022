@@ -10,6 +10,10 @@
 class Riscv
 {
 public:
+    static uint64 EXCEPTION_TIMER,
+            EXCEPTION_HARDWARE,
+            EXCEPTION_USER_ECALL,
+            EXCEPTION_SUPER_ECALL;
 
     // pop sstatus.spp and sstatus.spie bits (has to be a non inline function)
     static void popSppSpie();

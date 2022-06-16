@@ -11,7 +11,7 @@ uint64 TCB::timeSliceCounter = 0;
 
 TCB *TCB::createThread(Body body)
 {
-    return new TCB(body, TIME_SLICE);
+    return new TCB(body, DEFAULT_TIME_SLICE);
 }
 
 void TCB::yield()
