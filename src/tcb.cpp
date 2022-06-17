@@ -4,6 +4,7 @@
 
 #include "../h/tcb.hpp"
 #include "../h/riscv.hpp"
+#include "../h/sys_opcodes.h"
 
 TCB *TCB::running = nullptr;
 
@@ -14,9 +15,15 @@ TCB *TCB::createThread(Body body)
     return new TCB(body, DEFAULT_TIME_SLICE);
 }
 
+// koliko vidim ovo se poziva samo iz korisničkog režima
+// radi isto kao sistemski poziv
 void TCB::yield()
 {
+    uint64 volatile a0;
+    __asm__ volatile ("mv %0, a0" : "=r" (a0));
+    __asm__ volatile ("mv a0, %0" : : "r" (YIELD));
     __asm__ volatile ("ecall");
+    __asm__ volatile ("mv a0, %0" : : "r" (a0));
 }
 
 void TCB::dispatch()

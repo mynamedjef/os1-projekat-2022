@@ -81,6 +81,9 @@ public:
     // write register sstatus
     static void w_sstatus(uint64 sstatus);
 
+    // read opcode register (a0)
+    static uint64 r_opcode();
+
     // supervisor trap
     static void supervisorTrap();
     static void userModeTrap();
@@ -90,6 +93,9 @@ private:
     // supervisor trap handler
     static void handleSupervisorTrap();
     static void handleUserModeTrap();
+
+    static void processSyscall();
+    static void genericException();
 
 };
 
@@ -183,6 +189,13 @@ inline uint64 Riscv::r_sstatus()
 inline void Riscv::w_sstatus(uint64 sstatus)
 {
     __asm__ volatile ("csrw sstatus, %[sstatus]" : : [sstatus] "r"(sstatus));
+}
+
+inline uint64 Riscv::r_opcode()
+{
+	uint64 volatile a0;
+	__asm__ volatile ("mv %0, a0" : "=r" (a0));
+	return a0;
 }
 
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_RISCV_HPP

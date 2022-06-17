@@ -7,9 +7,12 @@
 #include "../h/print.hpp"
 #include "../h/riscv.hpp"
 #include "../h/userMain.hpp"
+#include "../h/syscall_c.h"
 
-inline void sys_call() {
-    __asm__ volatile ("ecall");
+// postavlja prekidnu rutinu na userModeTrap i aktivira je za prelazak u korisnički režim
+inline void userMode() {
+	Riscv::w_stvec((uint64) &Riscv::userModeTrap);
+	__asm__ volatile ("ecall");
 }
 
 int main()
@@ -17,9 +20,8 @@ int main()
     TCB *kernel = TCB::createThread(nullptr);
     TCB *user = TCB::createThread(userMain);
     TCB::running = kernel;
-
-    Riscv::w_stvec((uint64) &Riscv::userModeTrap);
-    sys_call();
+	
+    userMode();
 
     printString("ok...\n");
 

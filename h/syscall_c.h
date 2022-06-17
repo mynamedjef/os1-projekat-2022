@@ -5,6 +5,8 @@
 #ifndef _syscall_c
 #define _syscall_c
 
+#include "../lib/hw.h"
+
 // ============== memorija ===============
 
 void *mem_alloc(size_t size);
@@ -22,6 +24,7 @@ int thread_create(
 
 int thread_exit();
 void thread_dispatch();
+void yield();
 
 // ============== semafori ===============
 
