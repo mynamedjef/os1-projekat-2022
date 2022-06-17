@@ -19,15 +19,16 @@ void Riscv::popSppSpie() {
 void Riscv::handleSupervisorTrap() {
     uint64 scause = r_scause();
     if (scause == EXCEPTION_SUPER_ECALL) {
-        // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
+        // interrupt: no; cause code: environment call from S-mode(8)
+    }
+    else if (scause == EXCEPTION_USER_ECALL) {
+        // interrupt: no; cause code: environment call from U-mode(8)
         uint64 sepc = r_sepc() + 4;
         uint64 sstatus = r_sstatus();
         TCB::timeSliceCounter = 0;
         TCB::dispatch();
         w_sstatus(sstatus);
         w_sepc(sepc);
-    }
-    else if (scause == EXCEPTION_USER_ECALL) {
     }
     else if (scause == EXCEPTION_TIMER) {
         // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
@@ -49,5 +50,48 @@ void Riscv::handleSupervisorTrap() {
     }
     else {
         // unexpected trap cause
+    }
+}
+void Riscv::handleUserModeTrap() {
+    uint64 scause = r_scause();
+    if (scause == EXCEPTION_SUPER_ECALL || scause == EXCEPTION_USER_ECALL) {
+        // interrupt: no; cause code: environment call from S-mode(9)
+        volatile uint64 sepc = r_sepc() + 4;
+        volatile uint64 sstatus = r_sstatus();
+
+        printInteger(sstatus);
+        printString("\n");
+
+        sstatus |= SSTATUS_SPIE;
+        sstatus &= ~(SSTATUS_SPP);
+
+        w_sstatus((uint64)sstatus);
+        w_stvec((uint64) &supervisorTrap);
+
+        printInteger(sstatus);
+        printString("\n");
+        w_sepc(sepc);
+    }
+    else if (scause == EXCEPTION_TIMER) {
+        mc_sip(SIP_SSIP);
+    }
+    else if (scause == EXCEPTION_HARDWARE) {
+        // interrupt: yes; cause code: supervisor external interrupt (PLIC; could be keyboard)
+        console_handler();
+    }
+    else {
+        // unexpected trap cause, undefined behaviour
+        uint64 sepc = r_sepc();
+//        uint64 stvec = r_stvec();
+        uint64 stval = r_stval();
+        printString("scause:\t");
+        printInteger(scause);
+        printString("\n");
+        printString("sepc:\t");
+        printInteger(sepc);
+        printString("\n");
+        printString("stvec:\t");
+        printInteger(stval);
+        printString("\n");
     }
 }

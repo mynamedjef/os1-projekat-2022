@@ -6,6 +6,7 @@
 #define OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_RISCV_HPP
 
 #include "../lib/hw.h"
+#include "../h/print.hpp"
 
 class Riscv
 {
@@ -44,9 +45,9 @@ public:
 
     enum BitMaskSip
     {
-        SIP_SSIP = (1 << 1),
-        SIP_STIP = (1 << 5),
-        SIP_SEIP = (1 << 9),
+        SIP_SSIP = (1UL << 1),
+        SIP_STIP = (1UL << 5),
+        SIP_SEIP = (1UL << 9),
     };
 
     // mask set register sip
@@ -63,9 +64,9 @@ public:
 
     enum BitMaskSstatus
     {
-        SSTATUS_SIE = (1 << 1),
-        SSTATUS_SPIE = (1 << 5),
-        SSTATUS_SPP = (1 << 8),
+        SSTATUS_SIE = (1UL << 1),
+        SSTATUS_SPIE = (1UL << 5),
+        SSTATUS_SPP = (1UL << 8),
     };
 
     // mask set register sstatus
@@ -82,11 +83,13 @@ public:
 
     // supervisor trap
     static void supervisorTrap();
+    static void userModeTrap();
 
 private:
 
     // supervisor trap handler
     static void handleSupervisorTrap();
+    static void handleUserModeTrap();
 
 };
 

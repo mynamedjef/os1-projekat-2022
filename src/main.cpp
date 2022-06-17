@@ -8,14 +8,20 @@
 #include "../h/riscv.hpp"
 #include "../h/userMain.hpp"
 
+inline void sys_call() {
+    __asm__ volatile ("ecall");
+}
+
 int main()
 {
     TCB *kernel = TCB::createThread(nullptr);
     TCB *user = TCB::createThread(userMain);
     TCB::running = kernel;
 
-    Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
-    Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
+    Riscv::w_stvec((uint64) &Riscv::userModeTrap);
+    sys_call();
+
+    printString("ok...\n");
 
     while (!user->isFinished()) {
         TCB::yield();

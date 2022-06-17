@@ -8,20 +8,20 @@
 
 void printString(char const *string)
 {
-    uint64 sstatus = Riscv::r_sstatus();
-    Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
+//    uint64 sstatus = Riscv::r_sstatus();
+//    Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
     while (*string != '\0')
     {
         __putc(*string);
         string++;
     }
-    Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
+//    Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
 }
 
 void printInteger(uint64 integer)
 {
-    uint64 sstatus = Riscv::r_sstatus();
-    Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
+//    uint64 sstatus = Riscv::r_sstatus();
+//    Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
     static char digits[] = "0123456789";
     char buf[16];
     int i, neg;
@@ -46,5 +46,5 @@ void printInteger(uint64 integer)
         buf[i++] = '-';
 
     while (--i >= 0) { __putc(buf[i]); }
-    Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
+//    Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
 }
