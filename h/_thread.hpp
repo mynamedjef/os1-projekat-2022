@@ -13,7 +13,11 @@ public:
     
     using thread_t = _thread*;
     
-    _thread(thread_t*, Body, void*);
+    _thread(thread_t*, Body, uint64*, void*);
+
+    ~_thread();
+
+    bool isFinished() const { return tcb->isFinished(); }
     
     static int exit();
     

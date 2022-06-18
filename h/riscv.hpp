@@ -93,6 +93,9 @@ public:
     // returns ABI arg no3 of syscall
     static uint64 r_arg3();
 
+    // returns ABI arg no4 of syscall
+    static uint64 r_arg4();
+
     // writes retval of ABI syscall
     static void w_retval(uint64 retval);
 
@@ -229,6 +232,13 @@ inline uint64 Riscv::r_arg3()
     uint64 volatile a3;
     __asm__ volatile ("mv %0, a3" : "=r" (a3));
     return a3;
+}
+
+inline uint64 Riscv::r_arg4()
+{
+    uint64 volatile a4;
+    __asm__ volatile ("mv %0, a4" : "=r" (a4));
+    return a4;
 }
 
 inline void Riscv::w_retval(uint64 retval)

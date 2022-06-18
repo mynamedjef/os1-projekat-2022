@@ -7,11 +7,15 @@
 #include "../lib/console.h"
 #include "../h/sys_opcodes.h"
 #include "../lib/mem.h"
+#include "../h/_thread.hpp"
 
 uint64 Riscv::EXCEPTION_TIMER       = 0x8000000000000001UL;
 uint64 Riscv::EXCEPTION_HARDWARE    = 0x8000000000000009UL;
 uint64 Riscv::EXCEPTION_USER_ECALL  = 0x0000000000000008UL;
 uint64 Riscv::EXCEPTION_SUPER_ECALL = 0x0000000000000009UL;
+
+using Body = void (*)(void*);
+using thread_t = _thread*;
 
 void Riscv::popSppSpie() {
     __asm__ volatile ("csrw sepc, ra");
@@ -38,6 +42,7 @@ inline void Riscv::genericException() {
 }
 
 void Riscv::handleSupervisorTrap() {
+    uint64 *arg4 = (uint64*)r_arg4(); // iz nekog razloga se tokom if-a prebriše a4...pa se čuva ovde
     uint64 scause = r_scause();
     if (scause == EXCEPTION_USER_ECALL || scause == EXCEPTION_SUPER_ECALL) { // zvaće se iz super samo na početku kernel main-a, za alokaciju resursa
         // interrupt: no; cause code: environment call from U-mode(8)
@@ -59,6 +64,16 @@ void Riscv::handleSupervisorTrap() {
         {
             size_t volatile a1 = r_arg1();
             w_retval((uint64)__mem_free((void*)a1));
+        }
+        else if (opcode == THREAD_CREATE) // int thread_create(thread_t handle, void (*start_routine)(void*), void *arg, void *stack_space)
+        {
+            thread_t *handle = (thread_t*)r_arg1();
+            Body start_routine = (Body)r_arg2();
+            void *arg = (void*)r_arg3();
+            uint64 *stack_space = arg4;
+
+            new _thread(handle, start_routine, stack_space, arg);
+            w_retval(0);
         }
 
         w_sstatus(sstatus);

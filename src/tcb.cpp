@@ -10,9 +10,9 @@ TCB *TCB::running = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
-TCB *TCB::createThread(Body body, void *arg=nullptr)
+TCB *TCB::createThread(Body body, uint64 *stack_space=nullptr, void *arg=nullptr)
 {
-    return new TCB(body, DEFAULT_TIME_SLICE, arg);
+    return new TCB(body, DEFAULT_TIME_SLICE, stack_space, arg);
 }
 
 // koliko vidim ovo se poziva samo iz korisničkog režima

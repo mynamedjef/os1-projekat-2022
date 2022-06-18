@@ -15,6 +15,7 @@ inline void load_opcode(uint64 opcode) { __asm__ volatile ("mv a0, %0" : : "r" (
 
 // učitava prva tri argumenta na svoja mesta za ABI poziv
 inline void load_args() {
+    __asm__ volatile ("mv a4, a3");
     __asm__ volatile ("mv a3, a2");
     __asm__ volatile ("mv a2, a1");
     __asm__ volatile ("mv a1, a0");
@@ -34,6 +35,13 @@ void *mem_alloc_wrapper(size_t block_cnt) {
     return (void*)retval();
 }
 
+int thread_create_wrapper(thread_t *handle, void(*start_routine)(void*), void *arg, void *stack_space) {
+    load_args();
+    load_opcode(THREAD_CREATE);
+    syscall();
+    return (retval() == 0) ? 0 : -1;
+}
+
 // ---------- sistemski pozivi ----------
 
 
@@ -50,6 +58,14 @@ int mem_free(void *ptr) {
     load_opcode(MEM_FREE);
     syscall();
     return (retval() == 0) ? 0 : -1;
+}
+
+int thread_create(thread_t *handle, void(*start_routine)(void*), void *arg) {
+    if (handle == nullptr) { return -1; }
+    void *stack_space = mem_alloc(DEFAULT_STACK_SIZE);
+    if (stack_space == nullptr) { return -2; }
+
+    return thread_create_wrapper(handle, start_routine, arg, stack_space);
 }
 
 void yield() {

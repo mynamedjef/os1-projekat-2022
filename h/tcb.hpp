@@ -22,16 +22,16 @@ public:
 
     using Body = void (*)(void*);
 
-    static TCB *createThread(Body, void*);
+    static TCB *createThread(Body, uint64*, void*);
 
     static void yield();
 
     static TCB *running;
 
 private:
-    TCB(Body body, uint64 timeSlice, void *arg) :
+    TCB(Body body, uint64 timeSlice, uint64 *stack_space, void *arg) :
             body(body),
-            stack(body != nullptr ? new uint64[DEFAULT_STACK_SIZE] : nullptr),
+            stack(body != nullptr ? stack_space : nullptr),
             context({(uint64) &threadWrapper,
                      stack != nullptr ? (uint64) &stack[DEFAULT_STACK_SIZE] : 0
                     }),
