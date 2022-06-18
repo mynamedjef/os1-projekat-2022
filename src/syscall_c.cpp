@@ -32,10 +32,13 @@ inline uint64 retval() {
 // ---------- sistemski pozivi ----------
 
 void *mem_alloc(size_t size) {
-	load_opcode(MEM_ALLOC);
-	load_arg1(size);
-	syscall();
-	return (void*)retval();
+    uint64 volatile s = size;
+    load_opcode(MEM_ALLOC);
+    load_arg1(s);
+    syscall();
+    uint64 volatile ret;
+    __asm__ volatile ("mv %0, a0" : "=r" (ret));
+    return (void*)ret;
 }
 
 void yield() {

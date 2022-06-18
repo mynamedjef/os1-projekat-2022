@@ -6,6 +6,7 @@
 #include "../h/tcb.hpp"
 #include "../lib/console.h"
 #include "../h/sys_opcodes.h"
+#include "../lib/mem.h"
 
 uint64 Riscv::EXCEPTION_TIMER       = 0x8000000000000001UL;
 uint64 Riscv::EXCEPTION_HARDWARE    = 0x8000000000000009UL;
@@ -15,14 +16,6 @@ uint64 Riscv::EXCEPTION_SUPER_ECALL = 0x0000000000000009UL;
 void Riscv::popSppSpie() {
     __asm__ volatile ("csrw sepc, ra");
     __asm__ volatile ("sret");
-}
-
-inline void Riscv::processSyscall() {
-    uint64 volatile a0 = r_opcode();
-    if (a0 == YIELD) {
-        TCB::timeSliceCounter = 0;
-        TCB::dispatch();
-    }
 }
 
 inline void Riscv::genericException() {
@@ -48,7 +41,17 @@ void Riscv::handleSupervisorTrap() {
         uint64 volatile sepc = r_sepc() + 4;
         uint64 volatile sstatus = r_sstatus();
 
-        processSyscall();
+        uint64 volatile a0 = r_opcode();
+        if (a0 == YIELD) {
+            TCB::timeSliceCounter = 0;
+            TCB::dispatch();
+        }
+        else if (a0 == MEM_ALLOC) {
+            size_t volatile a1;
+            __asm__ volatile ("mv %0, a1" : "=r" (a1));
+            void *retval = __mem_alloc((size_t)(a1));
+            __asm__ volatile ("mv a0, %0" : : "r" ((uint64)retval));
+        }
 
         w_sstatus(sstatus);
         w_sepc(sepc);

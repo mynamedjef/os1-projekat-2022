@@ -8,6 +8,7 @@
 #include "../h/riscv.hpp"
 #include "../h/userMain.hpp"
 #include "../h/syscall_c.h"
+#include "../lib/mem.h"
 
 // postavlja prekidnu rutinu na userModeTrap i aktivira je za prelazak u korisnički režim
 inline void userMode() {
