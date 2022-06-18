@@ -42,13 +42,20 @@ void Riscv::handleSupervisorTrap() {
         uint64 volatile sstatus = r_sstatus();
 
         uint64 volatile opcode = r_opcode();
-        if (opcode == YIELD) { // void yield();
+        if (opcode == YIELD) // void yield()
+        {
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
         }
-        else if (opcode == MEM_ALLOC) { // void *mem_alloc(size_t size)
+        else if (opcode == MEM_ALLOC) // void *mem_alloc(size_t size)
+        {
             size_t volatile a1 = r_arg1(); // size_t size
             w_retval((uint64)__mem_alloc(a1));
+        }
+        else if (opcode == MEM_FREE) // int mem_free(void*)
+        {
+            size_t volatile a1 = r_arg1();
+            w_retval((uint64)__mem_free((void*)a1));
         }
 
         w_sstatus(sstatus);

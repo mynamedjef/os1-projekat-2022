@@ -36,6 +36,13 @@ void *mem_alloc(size_t size) {
     return (void*)retval();
 }
 
+int mem_free(void *ptr) {
+    load_args();
+    load_opcode(MEM_FREE);
+    syscall();
+    return (retval() == 0) ? 0 : -1;
+}
+
 void yield() {
 	TCB::yield();
 }
