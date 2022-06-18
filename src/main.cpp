@@ -18,10 +18,12 @@ inline void userMode() {
 
 int main()
 {
-    TCB *kernel = TCB::createThread(nullptr);
-    TCB *user = TCB::createThread(userMain);
+    Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
+    
+    TCB *kernel = TCB::createThread(nullptr, nullptr);
+    TCB *user = TCB::createThread(userMain, nullptr);
     TCB::running = kernel;
-	
+
     userMode();
 
     printString("ok...\n");

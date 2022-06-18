@@ -27,14 +27,15 @@ inline uint64 retval() {
 	return ret;
 }
 
-// ---------- sistemski pozivi ----------
-
 void *mem_alloc_wrapper(size_t block_cnt) {
     load_args();
     load_opcode(MEM_ALLOC);
     syscall();
     return (void*)retval();
 }
+
+// ---------- sistemski pozivi ----------
+
 
 void *mem_alloc(size_t size) {
     size_t block_cnt = size / MEM_BLOCK_SIZE;

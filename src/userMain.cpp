@@ -6,7 +6,7 @@
 #include "../h/print.hpp"
 #include "../h/workers.hpp"
 
-void userMain() {
+void userMain(void *) {
     TCB *threads[4];
 
     threads[0] = TCB::createThread(workerBodyA);

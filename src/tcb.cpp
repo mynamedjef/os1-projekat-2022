@@ -10,9 +10,9 @@ TCB *TCB::running = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
-TCB *TCB::createThread(Body body)
+TCB *TCB::createThread(Body body, void *arg=nullptr)
 {
-    return new TCB(body, DEFAULT_TIME_SLICE);
+    return new TCB(body, DEFAULT_TIME_SLICE, arg);
 }
 
 // koliko vidim ovo se poziva samo iz korisničkog režima
@@ -38,7 +38,7 @@ void TCB::dispatch()
 void TCB::threadWrapper()
 {
     Riscv::popSppSpie();
-    running->body();
+    running->body(running->arg);
     running->setFinished(true);
     TCB::yield();
 }

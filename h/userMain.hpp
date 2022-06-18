@@ -5,6 +5,6 @@
 #ifndef _user_main_hpp
 #define _user_main_hpp
 
-void userMain();
+void userMain(void *);
 
 #endif //_user_main_hpp

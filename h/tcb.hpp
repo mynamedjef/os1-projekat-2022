@@ -20,23 +20,24 @@ public:
 
     uint64 getTimeSlice() const { return timeSlice; }
 
-    using Body = void (*)();
+    using Body = void (*)(void*);
 
-    static TCB *createThread(Body body);
+    static TCB *createThread(Body, void*);
 
     static void yield();
 
     static TCB *running;
 
 private:
-    TCB(Body body, uint64 timeSlice) :
+    TCB(Body body, uint64 timeSlice, void *arg) :
             body(body),
             stack(body != nullptr ? new uint64[DEFAULT_STACK_SIZE] : nullptr),
             context({(uint64) &threadWrapper,
                      stack != nullptr ? (uint64) &stack[DEFAULT_STACK_SIZE] : 0
                     }),
             timeSlice(timeSlice),
-            finished(false)
+            finished(false),
+            arg(body != nullptr ? arg : nullptr)
     {
         if (body != nullptr) { Scheduler::put(this); }
     }
@@ -52,6 +53,7 @@ private:
     Context context;
     uint64 timeSlice;
     bool finished;
+    void *arg;
 
     friend class Riscv;
 

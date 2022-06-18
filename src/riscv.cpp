@@ -21,7 +21,7 @@ void Riscv::popSppSpie() {
 inline void Riscv::genericException() {
     uint64 volatile scause = r_scause();
     uint64 volatile sepc = r_sepc();
-//        uint64 stvec = r_stvec();
+    uint64 volatile stvec = r_stvec();
     uint64 volatile stval = r_stval();
     printString("scause:\t");
     printInteger(scause);
@@ -30,13 +30,16 @@ inline void Riscv::genericException() {
     printInteger(sepc);
     printString("\n");
     printString("stvec:\t");
+    printInteger(stvec);
+    printString("\n");
+    printString("stval:\t");
     printInteger(stval);
     printString("\n");
 }
 
 void Riscv::handleSupervisorTrap() {
     uint64 scause = r_scause();
-    if (scause == EXCEPTION_USER_ECALL) {
+    if (scause == EXCEPTION_USER_ECALL || scause == EXCEPTION_SUPER_ECALL) { // zvaće se iz super samo na početku kernel main-a, za alokaciju resursa
         // interrupt: no; cause code: environment call from U-mode(8)
         uint64 volatile sepc = r_sepc() + 4;
         uint64 volatile sstatus = r_sstatus();
