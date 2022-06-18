@@ -49,7 +49,7 @@ void Riscv::handleSupervisorTrap() {
         }
         else if (opcode == MEM_ALLOC) // void *mem_alloc(size_t size)
         {
-            size_t volatile a1 = r_arg1(); // size_t size
+            size_t volatile a1 = r_arg1() * MEM_BLOCK_SIZE; // size_t size
             w_retval((uint64)__mem_alloc(a1));
         }
         else if (opcode == MEM_FREE) // int mem_free(void*)

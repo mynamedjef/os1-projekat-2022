@@ -29,11 +29,19 @@ inline uint64 retval() {
 
 // ---------- sistemski pozivi ----------
 
-void *mem_alloc(size_t size) {
+void *mem_alloc_wrapper(size_t block_cnt) {
     load_args();
     load_opcode(MEM_ALLOC);
     syscall();
     return (void*)retval();
+}
+
+void *mem_alloc(size_t size) {
+    size_t block_cnt = size / MEM_BLOCK_SIZE;
+    if (size % MEM_BLOCK_SIZE != 0) {
+        block_cnt++;
+    }
+    return mem_alloc_wrapper(block_cnt);
 }
 
 int mem_free(void *ptr) {
