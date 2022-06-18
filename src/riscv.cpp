@@ -50,7 +50,7 @@ void Riscv::handleSupervisorTrap() {
         uint64 volatile sstatus = r_sstatus();
 
         uint64 volatile opcode = r_opcode();
-        if (opcode == YIELD) // void yield()
+        if (opcode == YIELD || opcode == THREAD_DISPATCH) // void yield() || void thread_dispatch()
         {
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
@@ -74,6 +74,10 @@ void Riscv::handleSupervisorTrap() {
 
             new _thread(handle, start_routine, stack_space, arg);
             w_retval(0);
+        }
+        else if (opcode == THREAD_EXIT) // int thread_exit()
+        {
+            w_retval(_thread::exit());
         }
 
         w_sstatus(sstatus);

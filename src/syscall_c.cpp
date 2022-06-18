@@ -68,6 +68,17 @@ int thread_create(thread_t *handle, void(*start_routine)(void*), void *arg) {
     return thread_create_wrapper(handle, start_routine, arg, stack_space);
 }
 
+int thread_exit() {
+    load_opcode(THREAD_EXIT);
+    syscall();
+    return (retval() == 0) ? 0 : -1;
+}
+
+void thread_dispatch() {
+    load_opcode(THREAD_DISPATCH);
+    syscall();
+}
+
 void yield() {
 	TCB::yield();
 }
