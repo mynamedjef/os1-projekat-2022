@@ -41,16 +41,14 @@ void Riscv::handleSupervisorTrap() {
         uint64 volatile sepc = r_sepc() + 4;
         uint64 volatile sstatus = r_sstatus();
 
-        uint64 volatile a0 = r_opcode();
-        if (a0 == YIELD) {
+        uint64 volatile opcode = r_opcode();
+        if (opcode == YIELD) { // void yield();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
         }
-        else if (a0 == MEM_ALLOC) {
-            size_t volatile a1;
-            __asm__ volatile ("mv %0, a1" : "=r" (a1));
-            void *retval = __mem_alloc((size_t)(a1));
-            __asm__ volatile ("mv a0, %0" : : "r" ((uint64)retval));
+        else if (opcode == MEM_ALLOC) { // void *mem_alloc(size_t size)
+            size_t volatile a1 = r_arg1(); // size_t size
+            w_retval((uint64)__mem_alloc(a1));
         }
 
         w_sstatus(sstatus);

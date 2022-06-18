@@ -84,6 +84,18 @@ public:
     // read opcode register (a0)
     static uint64 r_opcode();
 
+    // returns ABI arg no1 of syscall
+    static uint64 r_arg1();
+
+    // returns ABI arg no2 of syscall
+    static uint64 r_arg2();
+
+    // returns ABI arg no3 of syscall
+    static uint64 r_arg3();
+
+    // writes retval of ABI syscall
+    static void w_retval(uint64 retval);
+
     // supervisor trap
     static void supervisorTrap();
     static void userModeTrap();
@@ -196,6 +208,32 @@ inline uint64 Riscv::r_opcode()
 	uint64 volatile a0;
 	__asm__ volatile ("mv %0, a0" : "=r" (a0));
 	return a0;
+}
+
+inline uint64 Riscv::r_arg1()
+{
+    uint64 volatile a1;
+    __asm__ volatile ("mv %0, a1" : "=r" (a1));
+    return a1;
+}
+
+inline uint64 Riscv::r_arg2()
+{
+    uint64 volatile a2;
+    __asm__ volatile ("mv %0, a2" : "=r" (a2));
+    return a2;
+}
+
+inline uint64 Riscv::r_arg3()
+{
+    uint64 volatile a3;
+    __asm__ volatile ("mv %0, a3" : "=r" (a3));
+    return a3;
+}
+
+inline void Riscv::w_retval(uint64 retval)
+{
+    __asm__ volatile ("mv a0, %0" : : "r" (retval));
 }
 
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_RISCV_HPP
