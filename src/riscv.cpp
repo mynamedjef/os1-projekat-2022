@@ -8,6 +8,7 @@
 #include "../h/sys_opcodes.h"
 #include "../lib/mem.h"
 #include "../h/_thread.hpp"
+#include "../h/_sem.hpp"
 
 uint64 Riscv::EXCEPTION_TIMER       = 0x8000000000000001UL;
 uint64 Riscv::EXCEPTION_HARDWARE    = 0x8000000000000009UL;
@@ -16,6 +17,7 @@ uint64 Riscv::EXCEPTION_SUPER_ECALL = 0x0000000000000009UL;
 
 using Body = void (*)(void*);
 using thread_t = _thread*;
+using sem_t = _sem*;
 
 void Riscv::popSppSpie() {
     __asm__ volatile ("csrw sepc, ra");
@@ -79,6 +81,14 @@ void Riscv::handleSupervisorTrap() {
         else if (opcode == THREAD_EXIT) // int thread_exit()
         {
             w_retval(_thread::exit());
+        }
+        else if (opcode == SEM_OPEN)
+        {
+            sem_t *handle = (sem_t*)r_arg1();
+            unsigned init = (unsigned)r_arg2();
+
+            new _sem(handle, init);
+            w_retval(0);
         }
 
         w_sstatus(sstatus);

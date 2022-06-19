@@ -49,8 +49,9 @@ int thread_init_wrapper(thread_t *handle, void(*start_routine)(void*), void *arg
     return (retval() == 0) ? 0 : -1;
 }
 
-// ---------- sistemski pozivi ----------
+// ========== sistemski pozivi ==========
 
+// ---------- memorija ------------------
 
 void *mem_alloc(size_t size) {
     size_t block_cnt = size / MEM_BLOCK_SIZE;
@@ -66,6 +67,8 @@ int mem_free(void *ptr) {
     syscall();
     return (retval() == 0) ? 0 : -1;
 }
+
+// -------------- niti ------------------
 
 int thread_create(thread_t *handle, void(*start_routine)(void*), void *arg) {
     if (handle == nullptr) { return -1; }
@@ -92,4 +95,13 @@ int thread_exit() {
 void thread_dispatch() {
     load_opcode(THREAD_DISPATCH);
     syscall();
+}
+
+// -------------- semafori --------------
+
+int sem_open(sem_t *handle, unsigned init) {
+    load_args();
+    load_opcode(SEM_OPEN);
+    syscall();
+    return (int)retval();
 }

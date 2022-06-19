@@ -10,9 +10,9 @@
 
 class _sem {
 public:
-    _sem(int value);
+    _sem(_sem **handle, int value);
     
-    _sem();
+    _sem(_sem **handle);
     
     ~_sem();
     

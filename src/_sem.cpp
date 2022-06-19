@@ -4,9 +4,9 @@
 
 #include "../h/_sem.hpp"
 
-_sem::_sem(int value) : value(value), closed(false) {}
+_sem::_sem(_sem **handle, int value) : value(value), closed(false) { *handle = this; }
 
-_sem::_sem() : _sem(0) {}
+_sem::_sem(_sem **handle) : _sem(handle, 0) {}
 
 _sem::~_sem()
 {
