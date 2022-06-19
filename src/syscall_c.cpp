@@ -105,3 +105,14 @@ int sem_open(sem_t *handle, unsigned init) {
     syscall();
     return (int)retval();
 }
+
+int sem_close(sem_t id) {
+    if (!id) {
+        return -1;
+    }
+
+    load_args();
+    load_opcode(SEM_CLOSE);
+    syscall();
+    return (int)retval();
+}

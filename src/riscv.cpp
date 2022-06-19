@@ -90,6 +90,13 @@ void Riscv::handleSupervisorTrap() {
             new _sem(handle, init);
             w_retval(0);
         }
+        else if (opcode == SEM_CLOSE)
+        {
+            _sem *sem = (_sem*)r_arg1();
+            int ret = (sem->close() >= 0) ? 0 : -2;
+
+            w_retval(ret);
+        }
 
         w_sstatus(sstatus);
         w_sepc(sepc);

@@ -49,6 +49,10 @@ int _sem::val() const
 
 int _sem::close()
 {
+    if (closed) {
+        return -1;
+    }
+
     int size = waiting.size();
     closed = true;
     while (waiting.size() > 0) {
