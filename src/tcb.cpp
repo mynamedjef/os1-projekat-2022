@@ -46,3 +46,25 @@ void TCB::threadWrapper()
     running->status = FINISHED;
     TCB::yield();
 }
+
+int TCB::exit()
+{
+    if (running->status != RUNNING) {
+        return -1;
+    }
+
+    running->status = FINISHED;
+    yield();
+    return 0;
+}
+
+int TCB::start()
+{
+    if (status != CREATED) {
+        return -1;
+    }
+
+    status = READY;
+    Scheduler::put(this);
+    return 0;
+}

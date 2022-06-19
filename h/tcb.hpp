@@ -82,6 +82,10 @@ private:
 
     static void dispatch();
 
+    static int exit();
+
+    int start();
+
     static uint64 timeSliceCounter;
 };
 

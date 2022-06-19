@@ -12,24 +12,12 @@ _thread::_thread(thread_t *handle, Body body, uint64 *stack_space, void *arg=nul
 
 int _thread::exit()
 {
-    if (TCB::running->status != TCB::RUNNING) {
-        return -1;
-    }
-    
-    TCB::running->status = TCB::FINISHED;
-    dispatch();
-    return 0;
+    return TCB::exit();
 }
 
 int _thread::start()
 {
-    if (tcb->status != TCB::CREATED) {
-        return -1;
-    }
-    
-    tcb->status = TCB::READY;
-    Scheduler::put(tcb);
-    return 0;
+    return tcb->start();
 }
 
 void _thread::dispatch()
