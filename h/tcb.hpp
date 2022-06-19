@@ -16,6 +16,7 @@ public:
         CREATED,
         FINISHED,
         READY,
+        WAITING,
         RUNNING
     };
     

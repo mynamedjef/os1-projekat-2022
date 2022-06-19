@@ -29,7 +29,7 @@ void TCB::yield()
 void TCB::dispatch()
 {
     TCB *old = running;
-    if (!old->isFinished()) {
+    if (old->status == RUNNING) { // ako nije završena (FINISHED) ili ako ne čeka na semaforu (WAITING)
         old->status = READY;
         Scheduler::put(old);
     }
