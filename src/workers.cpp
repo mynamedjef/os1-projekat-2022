@@ -5,6 +5,8 @@
 #include "../lib/hw.h"
 #include "../h/tcb.hpp"
 #include "../h/print.hpp"
+#include "../h/syscall_cpp.hpp"
+#include "../h/workers.hpp"
 
 void workerBodyA(void* p)
 {
@@ -112,4 +114,23 @@ void workerBodyD(void*)
         printString("\n");
     }
 //    TCB::yield();
+}
+
+void ThreadWorkerE::run()
+{
+    for (uint64 i = 0; i < 16; i++)
+    {
+        printString("E: i=");
+        printInteger(i);
+        printString("\n");
+        for (uint64 j = 0; j < 10000; j++)
+        {
+            for (uint64 k = 0; k < 10000; k++)
+            {
+                // busy wait
+            }
+            TCB::yield();
+        }
+    }
+    printString("E: finished\n");
 }

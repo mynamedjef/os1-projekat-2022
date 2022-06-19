@@ -7,8 +7,8 @@
 
 #include "syscall_c.h"
 
-void *::operator new(size_t);
-void ::operator delete(void*);
+void *operator new(size_t);
+void operator delete(void*);
 
 class Thread {
 public:
@@ -17,11 +17,13 @@ public:
 	
 	int start();
 	
+    bool isFinished() const;
 	static void dispatch();
 	static int sleep(time_t);
 	
 protected:
 	Thread();
+    static void runWrapper(void*);
 	virtual void run() {}
 	
 private:

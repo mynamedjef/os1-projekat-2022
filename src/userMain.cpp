@@ -4,27 +4,38 @@
 
 #include "../h/tcb.hpp"
 #include "../h/print.hpp"
+#include "../h/syscall_cpp.hpp"
 #include "../h/workers.hpp"
-#include "../h/syscall_c.h"
 #include "../h/_thread.hpp"
 
 void userMain1() {
-    thread_t threads[4];
+    Thread *threads[5];
 
-    thread_create(&threads[0], workerBodyA, nullptr);
+    threads[0] = new Thread(workerBodyA, nullptr);
     printString("ThreadA created\n");
-    thread_create(&threads[1], workerBodyB, nullptr);
+    threads[1] = new Thread(workerBodyB, nullptr);
     printString("ThreadB created\n");
-    thread_create(&threads[2], workerBodyC, nullptr);
+    threads[2] = new Thread(workerBodyC, nullptr);
     printString("ThreadC created\n");
-    thread_create(&threads[3], workerBodyD, nullptr);
+    threads[3] = new Thread(workerBodyD, nullptr);
     printString("ThreadD created\n");
+    threads[4] = new ThreadWorkerE();
+    printString("ThreadE created\n");
+    
+    for (auto &thread : threads) {
+        thread->start();
+    }
 
-    while (!(threads[0]->isFinished() &&
-             threads[1]->isFinished() &&
-             threads[2]->isFinished() &&
-             threads[3]->isFinished()))
-    {
+    while (true) {
+        bool finished = true;
+        for (auto &thread : threads) {
+            if (!thread->isFinished()) {
+                finished = false;
+                break;
+            }
+        }
+        if (finished) { break; }
+        
         TCB::yield();
     }
 

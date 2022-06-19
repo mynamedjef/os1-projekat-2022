@@ -11,6 +11,8 @@ class _thread {
     
     friend class Riscv;
 
+    friend class Thread;
+
 public:
     
     using Body = void(*)(void*);
