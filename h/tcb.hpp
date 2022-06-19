@@ -24,19 +24,21 @@ public:
     bool isFinished() const { return status == FINISHED; }
 
     void setStatus(Status status) { this->status = status; }
+    
+    Status getStatus() const { return status; }
 
     uint64 getTimeSlice() const { return timeSlice; }
 
     using Body = void (*)(void*);
 
-    static TCB *createThread(Body, uint64*, void*);
+    static TCB *createThread(Body, uint64*, void*, bool);
 
     static void yield();
 
     static TCB *running;
 
 private:
-    TCB(Body body, uint64 timeSlice, uint64 *stack_space, void *arg) :
+    TCB(Body body, uint64 timeSlice, uint64 *stack_space, void *arg, bool init) :
             body(body),
             stack(body != nullptr ? stack_space : nullptr),
             context({(uint64) &threadWrapper,
@@ -45,12 +47,15 @@ private:
             timeSlice(timeSlice),
             arg(body != nullptr ? arg : nullptr)
     {
-        if (body != nullptr) {
-            Scheduler::put(this);
-            status = READY;
-        }
-        else { // radi se o kernel main niti
+        if (body == nullptr) { // radi se o kernel main niti
             status = RUNNING;
+        }
+        else if (init) { // nit je inicijalizovana ali ne startovana
+            status = CREATED;
+        }
+        else { // nit je startovana čim se napravi
+            status = READY;
+            Scheduler::put(this);
         }
     }
 
@@ -68,6 +73,8 @@ private:
     void *arg;
 
     friend class Riscv;
+    
+    friend class _thread;
 
     static void threadWrapper();
 

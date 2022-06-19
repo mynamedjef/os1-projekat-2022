@@ -42,6 +42,13 @@ int thread_create_wrapper(thread_t *handle, void(*start_routine)(void*), void *a
     return (retval() == 0) ? 0 : -1;
 }
 
+int thread_init_wrapper(thread_t *handle, void(*start_routine)(void*), void *arg, void *stack_space) {
+    load_args();
+    load_opcode(THREAD_INIT);
+    syscall();
+    return (retval() == 0) ? 0 : -1;
+}
+
 // ---------- sistemski pozivi ----------
 
 
@@ -66,6 +73,14 @@ int thread_create(thread_t *handle, void(*start_routine)(void*), void *arg) {
     if (stack_space == nullptr) { return -2; }
 
     return thread_create_wrapper(handle, start_routine, arg, stack_space);
+}
+
+int thread_init(thread_t *handle, void(*start_routine)(void*), void *arg) {
+    if (handle == nullptr) { return -1; }
+    void *stack_space = mem_alloc(DEFAULT_STACK_SIZE);
+    if (stack_space == nullptr) { return -2; }
+    
+    return thread_init_wrapper(handle, start_routine, arg, stack_space);
 }
 
 int thread_exit() {

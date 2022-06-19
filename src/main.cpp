@@ -18,13 +18,13 @@ inline void userMode() {
 
 TCB *kernel_thread()
 {
-    return TCB::createThread(nullptr, nullptr, nullptr);
+    return TCB::createThread(nullptr, nullptr, nullptr, false);
 }
 
 TCB *user_thread()
 {
     uint64 *stack = new uint64[DEFAULT_STACK_SIZE];
-    return TCB::createThread(userMain, stack, nullptr);
+    return TCB::createThread(userMain, stack, nullptr, false);
 }
 
 int main()

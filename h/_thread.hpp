@@ -8,7 +8,11 @@
 #include "../h/tcb.hpp"
 
 class _thread {
+    
+    friend class Riscv;
+
 public:
+    
     using Body = void(*)(void*);
     
     using thread_t = _thread*;
@@ -25,6 +29,9 @@ public:
     
 private:
     TCB *tcb = nullptr;
+    
+    int start();
+    
 };
 
 #endif //_thread_hpp

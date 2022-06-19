@@ -65,14 +65,15 @@ void Riscv::handleSupervisorTrap() {
             size_t volatile a1 = r_arg1();
             w_retval((uint64)__mem_free((void*)a1));
         }
-        else if (opcode == THREAD_CREATE) // int thread_create(thread_t handle, void (*start_routine)(void*), void *arg, void *stack_space)
+        else if (opcode == THREAD_CREATE || opcode == THREAD_INIT) // int thread_create(thread_t handle, void (*start_routine)(void*), void *arg, void *stack_space)
         {
             thread_t *handle = (thread_t*)r_arg1();
             Body start_routine = (Body)r_arg2();
             void *arg = (void*)r_arg3();
             uint64 *stack_space = arg4;
 
-            new _thread(handle, start_routine, stack_space, arg);
+            _thread *t = new _thread(handle, start_routine, stack_space, arg);
+            if (opcode == THREAD_CREATE) { t->start(); }
             w_retval(0);
         }
         else if (opcode == THREAD_EXIT) // int thread_exit()

@@ -6,16 +6,29 @@
 
 _thread::_thread(thread_t *handle, Body body, uint64 *stack_space, void *arg=nullptr)
 {
-    tcb = TCB::createThread(body, stack_space, arg);
+    tcb = TCB::createThread(body, stack_space, arg, true);
     *handle = this;
 }
 
 int _thread::exit()
 {
-    if (TCB::running->isFinished()) { return -1; }
+    if (TCB::running->status != TCB::RUNNING) {
+        return -1;
+    }
     
-    TCB::running->setStatus(TCB::FINISHED);
+    TCB::running->status = TCB::FINISHED;
     dispatch();
+    return 0;
+}
+
+int _thread::start()
+{
+    if (tcb->status != TCB::CREATED) {
+        return -1;
+    }
+    
+    tcb->status = TCB::READY;
+    Scheduler::put(tcb);
     return 0;
 }
 
