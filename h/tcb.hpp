@@ -12,11 +12,18 @@
 class TCB
 {
 public:
+    enum Status {
+        CREATED,
+        FINISHED,
+        READY,
+        RUNNING
+    };
+    
     ~TCB() { delete[] stack; }
 
-    bool isFinished() const { return finished; }
+    bool isFinished() const { return status == FINISHED; }
 
-    void setFinished(bool value) { finished = value; }
+    void setStatus(Status status) { this->status = status; }
 
     uint64 getTimeSlice() const { return timeSlice; }
 
@@ -36,10 +43,15 @@ private:
                      stack != nullptr ? (uint64) &stack[DEFAULT_STACK_SIZE] : 0
                     }),
             timeSlice(timeSlice),
-            finished(false),
             arg(body != nullptr ? arg : nullptr)
     {
-        if (body != nullptr) { Scheduler::put(this); }
+        if (body != nullptr) {
+            Scheduler::put(this);
+            status = READY;
+        }
+        else { // radi se o kernel main niti
+            status = RUNNING;
+        }
     }
 
     struct Context
@@ -52,7 +64,7 @@ private:
     uint64 *stack;
     Context context;
     uint64 timeSlice;
-    bool finished;
+    Status status;
     void *arg;
 
     friend class Riscv;

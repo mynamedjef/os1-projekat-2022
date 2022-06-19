@@ -14,7 +14,7 @@ int _thread::exit()
 {
     if (TCB::running->isFinished()) { return -1; }
     
-    TCB::running->setFinished(true);
+    TCB::running->setStatus(TCB::FINISHED);
     dispatch();
     return 0;
 }

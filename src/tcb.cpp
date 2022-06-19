@@ -39,6 +39,6 @@ void TCB::threadWrapper()
 {
     Riscv::popSppSpie();
     running->body(running->arg);
-    running->setFinished(true);
+    running->setStatus(FINISHED);
     TCB::yield();
 }
