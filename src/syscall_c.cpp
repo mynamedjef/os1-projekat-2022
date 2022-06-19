@@ -93,9 +93,3 @@ void thread_dispatch() {
     load_opcode(THREAD_DISPATCH);
     syscall();
 }
-
-void yield() {
-	TCB::yield();
-}
-
-

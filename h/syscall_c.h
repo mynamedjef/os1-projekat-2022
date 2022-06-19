@@ -30,7 +30,6 @@ int thread_init(
 
 int thread_exit();
 void thread_dispatch();
-void yield();
 
 // ============== semafori ===============
 
