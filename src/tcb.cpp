@@ -88,3 +88,14 @@ int TCB::start()
     Scheduler::put(this);
     return 0;
 }
+
+int TCB::wake()
+{
+    if (status != SLEEPING) {
+        return -1;
+    }
+
+    status = READY;
+    Scheduler::put(this);
+    return 0;
+}

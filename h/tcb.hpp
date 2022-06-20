@@ -7,6 +7,7 @@
 
 #include "../lib/hw.h"
 #include "scheduler.hpp"
+#include "sleep_list.hpp"
 
 // Thread Control Block
 class TCB
@@ -18,7 +19,8 @@ public:
         READY,
         WAITING,
         RUNNING,
-        IDLE
+        IDLE,
+        SLEEPING
     };
     
     ~TCB() { delete[] stack; }
@@ -91,6 +93,8 @@ private:
     
     friend class _thread;
 
+    friend class SleepList;
+
     static void threadWrapper();
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
@@ -100,6 +104,8 @@ private:
     static int exit();
 
     int start();
+
+    int wake();
 
     static uint64 timeSliceCounter;
 };

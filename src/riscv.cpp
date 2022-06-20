@@ -9,6 +9,7 @@
 #include "../lib/mem.h"
 #include "../h/_thread.hpp"
 #include "../h/_sem.hpp"
+#include "../h/sleep_list.hpp"
 
 uint64 Riscv::EXCEPTION_TIMER       = 0x8000000000000001UL;
 uint64 Riscv::EXCEPTION_HARDWARE    = 0x8000000000000009UL;
@@ -111,6 +112,7 @@ void Riscv::handleSupervisorTrap() {
     }
     else if (scause == EXCEPTION_TIMER) {
         // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
+        SleepList::instance()->tick();
         TCB::timeSliceCounter++;
         if (TCB::running && TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {

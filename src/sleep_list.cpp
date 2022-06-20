@@ -4,6 +4,17 @@
 
 #include "../h/sleep_list.hpp"
 
+SleepList *SleepList::inst = nullptr;
+
+SleepList *SleepList::instance()
+{
+    if (inst) {
+        return inst;
+    }
+    inst = new SleepList();
+    return inst;
+}
+
 bool SleepList::Comparator(Sleeping *t1, Sleeping *t2)
 {
     return (t1->time < t2->time);
@@ -22,6 +33,10 @@ TCB *SleepList::popPriority()
 void SleepList::tick()
 {
     passed = (size() < 1) ? 0 : passed+1;
+    total_passed++;
+    while (is_ready()) {
+        popPriority()->wake();
+    }
 }
 
 bool SleepList::is_ready()
@@ -32,6 +47,11 @@ bool SleepList::is_ready()
 time_t SleepList::time_passed()
 {
     return passed;
+}
+
+time_t SleepList::total_time_passed()
+{
+    return total_passed;
 }
 
 void SleepList::addPriority(Sleeping *data) {
@@ -56,4 +76,9 @@ void SleepList::addPriority(Sleeping *data) {
         prev->next = elem;
         tail = elem;
     }
+}
+
+void SleepList::addPriority(TCB *tcb, time_t time)
+{
+    SleepList::addPriority(new Sleeping(tcb, time+passed));
 }

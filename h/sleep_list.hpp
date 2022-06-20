@@ -27,10 +27,22 @@ public:
 
     time_t time_passed();
 
+    time_t total_time_passed();
+
     void addPriority(Sleeping *data);
+
+    void addPriority(TCB*, time_t);
+
+    static SleepList *instance();
 
 private:
     time_t passed;
+
+    time_t total_passed;
+
+    static SleepList *inst;
+
+    SleepList() : passed(0), total_passed(0) { };
 };
 
 #endif //_sleep_list_hpp
