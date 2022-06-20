@@ -133,6 +133,17 @@ int sem_close(sem_t id) {
     return (retval() == 0) ? 0 : -2;
 }
 
+int sem_wait(sem_t id) {
+    if (!id) {
+        return -1;
+    }
+
+    load_args();
+    load_opcode(SEM_WAIT);
+    syscall();
+    return (retval() == 0) ? 0 : -2;
+}
+
 int sem_signal(sem_t id) {
     if (!id) {
         return -1;
