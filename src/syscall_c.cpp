@@ -116,3 +116,15 @@ int sem_close(sem_t id) {
     syscall();
     return (int)retval();
 }
+
+int sem_signal(sem_t id) {
+    if (!id) {
+        return -1;
+    }
+
+    load_args();
+    load_opcode(SEM_SIGNAL);
+    syscall();
+
+    return (retval() == 0) ? 0 : -2;
+}

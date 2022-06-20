@@ -97,6 +97,11 @@ void Riscv::handleSupervisorTrap() {
 
             w_retval(ret);
         }
+        else if (opcode == SEM_SIGNAL)
+        {
+            _sem *sem = (_sem*)r_arg1();
+            w_retval(sem->signal());
+        }
 
         w_sstatus(sstatus);
         w_sepc(sepc);
