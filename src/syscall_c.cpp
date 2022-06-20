@@ -36,17 +36,25 @@ void *mem_alloc_wrapper(size_t block_cnt) {
 }
 
 int thread_create_wrapper(thread_t *handle, void(*start_routine)(void*), void *arg, void *stack_space) {
+    if (!handle) {
+        return -1;
+    }
+
     load_args();
     load_opcode(THREAD_CREATE);
     syscall();
-    return (retval() == 0) ? 0 : -1;
+    return (retval() == 0) ? 0 : -2;
 }
 
 int thread_init_wrapper(thread_t *handle, void(*start_routine)(void*), void *arg, void *stack_space) {
+    if (!handle) {
+        return -1;
+    }
+
     load_args();
     load_opcode(THREAD_INIT);
     syscall();
-    return (retval() == 0) ? 0 : -1;
+    return (retval() == 0) ? 0 : -2;
 }
 
 // ========== sistemski pozivi ==========
@@ -62,10 +70,14 @@ void *mem_alloc(size_t size) {
 }
 
 int mem_free(void *ptr) {
+    if (ptr == nullptr) {
+        return -1;
+    }
+
     load_args();
     load_opcode(MEM_FREE);
     syscall();
-    return (retval() == 0) ? 0 : -1;
+    return (retval() == 0) ? 0 : -2;
 }
 
 // -------------- niti ------------------
@@ -100,10 +112,14 @@ void thread_dispatch() {
 // -------------- semafori --------------
 
 int sem_open(sem_t *handle, unsigned init) {
+    if (!handle) {
+        return -1;
+    }
+
     load_args();
     load_opcode(SEM_OPEN);
     syscall();
-    return (int)retval();
+    return (retval() == 0) ? 0 : -2;
 }
 
 int sem_close(sem_t id) {
@@ -114,7 +130,7 @@ int sem_close(sem_t id) {
     load_args();
     load_opcode(SEM_CLOSE);
     syscall();
-    return (int)retval();
+    return (retval() == 0) ? 0 : -2;
 }
 
 int sem_signal(sem_t id) {
@@ -125,6 +141,5 @@ int sem_signal(sem_t id) {
     load_args();
     load_opcode(SEM_SIGNAL);
     syscall();
-
     return (retval() == 0) ? 0 : -2;
 }

@@ -53,12 +53,11 @@ int _sem::close()
         return -1;
     }
 
-    int size = waiting.size();
     closed = true;
     while (waiting.size() > 0) {
         unblock();
     }
-    return size;
+    return 0;
 }
 
 void _sem::unblock()
