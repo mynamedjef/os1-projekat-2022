@@ -112,7 +112,7 @@ void Riscv::handleSupervisorTrap() {
     else if (scause == EXCEPTION_TIMER) {
         // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
         TCB::timeSliceCounter++;
-        if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
+        if (TCB::running && TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {
             uint64 sepc = r_sepc();
             uint64 sstatus = r_sstatus();

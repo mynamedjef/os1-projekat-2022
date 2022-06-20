@@ -8,11 +8,18 @@
 
 TCB *TCB::running = nullptr;
 
+TCB *TCB::idle = nullptr;
+
 uint64 TCB::timeSliceCounter = 0;
 
 TCB *TCB::createThread(Body body, uint64 *stack_space, void *arg, bool init)
 {
     return new TCB(body, DEFAULT_TIME_SLICE, stack_space, arg, init);
+}
+
+TCB *TCB::idleThread(Body body, uint64 *stack_space)
+{
+    return new TCB(body, stack_space);
 }
 
 // koliko vidim ovo se poziva samo iz korisničkog režima
@@ -34,7 +41,15 @@ void TCB::dispatch()
         Scheduler::put(old);
     }
     running = Scheduler::get();
-    running->status = RUNNING;
+    if (running) {
+        running->status = RUNNING;
+    }
+    else if (idle) {
+        running = idle;
+    }
+    else {
+        return;
+    }
 
     TCB::contextSwitch(&old->context, &running->context);
 }

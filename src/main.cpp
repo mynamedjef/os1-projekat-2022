@@ -7,8 +7,6 @@
 #include "../h/print.hpp"
 #include "../h/riscv.hpp"
 #include "../h/userMain.hpp"
-#include "../h/syscall_c.h"
-#include "../lib/mem.h"
 
 // postavlja prekidnu rutinu na userModeTrap i aktivira je za prelazak u korisnički režim
 inline void userMode() {
@@ -27,11 +25,21 @@ TCB *user_thread()
     return TCB::createThread(userMain, stack, nullptr, false);
 }
 
+void idling(void*) { while(true) {} }
+
+TCB *idle_thread()
+{
+    uint64 *stack = new uint64[DEFAULT_STACK_SIZE];
+    return TCB::idleThread(idling, stack);
+}
+
+
 int main()
 {
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
     
     TCB *kernel = TCB::running = kernel_thread();
+    TCB *idle = TCB::idle = idle_thread();
     TCB *user = user_thread();
 
     userMode();
@@ -42,7 +50,10 @@ int main()
         TCB::yield();
     }
 
+    TCB::idle = nullptr;
+    delete idle;
     delete user;
+    TCB::running = nullptr;
     delete kernel;
     printString("main() finished\n");
 

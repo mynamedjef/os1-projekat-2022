@@ -17,7 +17,8 @@ public:
         FINISHED,
         READY,
         WAITING,
-        RUNNING
+        RUNNING,
+        IDLE
     };
     
     ~TCB() { delete[] stack; }
@@ -34,9 +35,13 @@ public:
 
     static TCB *createThread(Body, uint64*, void*, bool);
 
+    static TCB *idleThread(Body, uint64*);
+    
     static void yield();
 
     static TCB *running;
+    
+    static TCB *idle;
 
 private:
     TCB(Body body, uint64 timeSlice, uint64 *stack_space, void *arg, bool init) :
@@ -58,6 +63,12 @@ private:
             status = READY;
             Scheduler::put(this);
         }
+    }
+    
+    TCB(Body body, uint64 *stack_space) :
+        TCB(body, DEFAULT_TIME_SLICE, stack_space, nullptr, true)
+    {
+        status = IDLE;
     }
 
     struct Context
