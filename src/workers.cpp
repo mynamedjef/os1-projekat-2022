@@ -4,14 +4,14 @@
 
 #include "../lib/hw.h"
 #include "../h/tcb.hpp"
-#include "../h/print.hpp"
+#include "../h/printing.hpp"
 
 void workerBodyA()
 {
     for (uint64 i = 0; i < 10; i++)
     {
         printString("A: i=");
-        printInteger(i);
+        printInt(i);
         printString("\n");
         for (uint64 j = 0; j < 10000; j++)
         {
@@ -30,7 +30,7 @@ void workerBodyB()
     for (uint64 i = 0; i < 16; i++)
     {
         printString("B: i=");
-        printInteger(i);
+        printInt(i);
         printString("\n");
         for (uint64 j = 0; j < 10000; j++)
         {
@@ -57,7 +57,7 @@ void workerBodyC()
     for (; i < 3; i++)
     {
         printString("C: i=");
-        printInteger(i);
+        printInt(i);
         printString("\n");
     }
 
@@ -69,18 +69,18 @@ void workerBodyC()
     __asm__ ("mv %[t1], t1" : [t1] "=r"(t1));
 
     printString("C: t1=");
-    printInteger(t1);
+    printInt(t1);
     printString("\n");
 
     uint64 result = fibonacci(12);
     printString("C: fibonaci=");
-    printInteger(result);
+    printInt(result);
     printString("\n");
 
     for (; i < 6; i++)
     {
         printString("C: i=");
-        printInteger(i);
+        printInt(i);
         printString("\n");
     }
     TCB::yield();
@@ -92,7 +92,7 @@ void workerBodyD()
     for (; i < 13; i++)
     {
         printString("D: i=");
-        printInteger(i);
+        printInt(i);
         printString("\n");
     }
 
@@ -102,13 +102,13 @@ void workerBodyD()
 
     uint64 result = fibonacci(16);
     printString("D: fibonaci=");
-    printInteger(result);
+    printInt(result);
     printString("\n");
 
     for (; i < 16; i++)
     {
         printString("D: i=");
-        printInteger(i);
+        printInt(i);
         printString("\n");
     }
 //    TCB::yield();

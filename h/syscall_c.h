@@ -5,6 +5,8 @@
 #ifndef _syscall_c
 #define _syscall_c
 
+#include "../lib/hw.h"
+
 // ============== memorija ===============
 
 void *mem_alloc(size_t size);
