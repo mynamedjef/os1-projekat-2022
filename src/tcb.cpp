@@ -89,6 +89,18 @@ int TCB::start()
     return 0;
 }
 
+int TCB::sleep(time_t time)
+{
+    if (status != RUNNING) {
+        return -1;
+    }
+
+    status = SLEEPING;
+    SleepList::instance()->addPriority(this, time);
+    yield();
+    return 0;
+}
+
 int TCB::wake()
 {
     if (status != SLEEPING) {

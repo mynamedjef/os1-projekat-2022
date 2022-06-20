@@ -104,7 +104,9 @@ private:
     static int exit();
 
     int start();
-
+    
+    int sleep(time_t);
+    
     int wake();
 
     static uint64 timeSliceCounter;

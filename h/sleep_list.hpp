@@ -28,6 +28,8 @@ public:
     time_t time_passed();
 
     time_t total_time_passed();
+    
+    int sleep(time_t);
 
     void addPriority(Sleeping *data);
 

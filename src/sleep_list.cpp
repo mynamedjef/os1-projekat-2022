@@ -39,9 +39,14 @@ void SleepList::tick()
     }
 }
 
+int SleepList::sleep(time_t time)
+{
+    return TCB::running->sleep(time);
+}
+
 bool SleepList::is_ready()
 {
-    return (size() && peekFirst()->time <= passed);
+    return (size() > 0 && peekFirst()->time <= passed);
 }
 
 time_t SleepList::time_passed()
