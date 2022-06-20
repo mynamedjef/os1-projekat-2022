@@ -17,49 +17,17 @@ struct Sleeping {
 
 class SleepList : public List<Sleeping> {
 public:
-    bool Comparator(Sleeping *t1, Sleeping *t2)
-    {
-        return (t1->time < t2->time);
-    }
+    bool Comparator(Sleeping *t1, Sleeping *t2);
 
-    void tick()
-    {
-        passed = (size() < 1) ? 0 : passed+1;
-    }
+    TCB *popPriority();
 
-    bool is_ready()
-    {
-        return (peekFirst()->time <= passed);
-    }
+    void tick();
 
-    time_t time_passed()
-    {
-        return passed;
-    }
+    bool is_ready();
 
-    void addPriority(Sleeping *data) {
-        if (!head || data->time < head->data->time)
-        {
-            addFirst(data);
-            return;
-        }
-        else
-        {
-            Elem *elem = new Elem(data, nullptr);
-            count++;
+    time_t time_passed();
 
-            Elem *prev = head;
-            for (Elem *curr = head->next; curr; curr = curr->next) {
-                if (data->time < curr->data->time) {
-                    prev->next = elem;
-                    elem->next = curr;
-                    return;
-                }
-            }
-            prev->next = elem;
-            tail = elem;
-        }
-    }
+    void addPriority(Sleeping *data);
 
 private:
     time_t passed;
