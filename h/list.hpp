@@ -8,7 +8,7 @@
 template<typename T>
 class List
 {
-private:
+protected:
     struct Elem
     {
         T *data;
@@ -18,6 +18,7 @@ private:
     };
 
     Elem *head, *tail;
+
     int count;
 
 public:
@@ -96,6 +97,14 @@ public:
     {
         if (!tail) { return nullptr; }
         return tail->data;
+    }
+
+    T *peekPriority() {
+        return peekFirst();
+    }
+
+    T *popPriority() {
+        return removeFirst();
     }
 };
 
