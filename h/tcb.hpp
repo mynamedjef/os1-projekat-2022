@@ -43,6 +43,8 @@ public:
     
     static TCB *idle;
 
+    static List<TCB> all_tcbs;
+
 private:
     TCB(Body body, uint64 timeSlice, uint64 *stack_space, void *arg, bool init) :
             body(body),
@@ -63,6 +65,7 @@ private:
             status = READY;
             Scheduler::put(this);
         }
+        all_tcbs.addLast(this);
     }
     
     TCB(Body body, uint64 *stack_space) :

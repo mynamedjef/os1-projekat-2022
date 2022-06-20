@@ -10,6 +10,8 @@ TCB *TCB::running = nullptr;
 
 TCB *TCB::idle = nullptr;
 
+List<TCB> TCB::all_tcbs;
+
 uint64 TCB::timeSliceCounter = 0;
 
 TCB *TCB::createThread(Body body, uint64 *stack_space, void *arg, bool init)
@@ -36,12 +38,10 @@ void TCB::yield()
 void TCB::dispatch()
 {
     TCB *old = running;
-    if (old->status == RUNNING) { // ako nije završena (FINISHED) ili ako ne čeka na semaforu (WAITING)
-        old->status = READY;
-        Scheduler::put(old);
-    }
-    running = Scheduler::get();
-    if (running) {
+    TCB *next = Scheduler::get();
+
+    if (next) {
+        running = next;
         running->status = RUNNING;
     }
     else if (idle) {
@@ -49,6 +49,11 @@ void TCB::dispatch()
     }
     else {
         return;
+    }
+
+    if (old->status == RUNNING) { // ako nije završena (FINISHED), ako ne čeka na semaforu (WAITING) ili ako nije besposlena (IDLE)
+        old->status = READY;
+        Scheduler::put(old);
     }
 
     TCB::contextSwitch(&old->context, &running->context);

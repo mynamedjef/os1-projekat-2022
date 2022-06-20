@@ -15,3 +15,13 @@ void Scheduler::put(TCB *ccb)
 {
     readyThreadQueue.addLast(ccb);
 }
+
+int Scheduler::size()
+{
+    return readyThreadQueue.size();
+}
+
+TCB *Scheduler::peek()
+{
+    return readyThreadQueue.peekFirst();
+}

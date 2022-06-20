@@ -21,7 +21,7 @@ private:
     int count;
 
 public:
-    List() : head(0), tail(0), count(0) {}
+    List() : head(nullptr), tail(nullptr), count(0) {}
 
     List(const List<T> &) = delete;
 
@@ -39,7 +39,7 @@ public:
 
     void addLast(T *data)
     {
-        Elem *elem = new Elem(data, 0);
+        Elem *elem = new Elem(data, nullptr);
         if (tail)
         {
             tail->next = elem;
@@ -53,11 +53,11 @@ public:
 
     T *removeFirst()
     {
-        if (!head) { return 0; }
+        if (!head) { return nullptr; }
 
         Elem *elem = head;
         head = head->next;
-        if (!head) { tail = 0; }
+        if (!head) { tail = nullptr; }
 
         T *ret = elem->data;
         count--;
@@ -67,23 +67,23 @@ public:
 
     T *peekFirst()
     {
-        if (!head) { return 0; }
+        if (!head) { return nullptr; }
         return head->data;
     }
 
     T *removeLast()
     {
-        if (!head) { return 0; }
+        if (!head) { return nullptr; }
 
-        Elem *prev = 0;
+        Elem *prev = nullptr;
         for (Elem *curr = head; curr && curr != tail; curr = curr->next)
         {
             prev = curr;
         }
 
         Elem *elem = tail;
-        if (prev) { prev->next = 0; }
-        else { head = 0; }
+        if (prev) { prev->next = nullptr; }
+        else { head = nullptr; }
         tail = prev;
 
         T *ret = elem->data;
@@ -94,7 +94,7 @@ public:
 
     T *peekLast()
     {
-        if (!tail) { return 0; }
+        if (!tail) { return nullptr; }
         return tail->data;
     }
 };

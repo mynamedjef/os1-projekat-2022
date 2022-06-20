@@ -18,6 +18,10 @@ public:
     static TCB *get();
 
     static void put(TCB *ccb);
+    
+    static int size();
+    
+    static TCB *peek();
 
 };
 
