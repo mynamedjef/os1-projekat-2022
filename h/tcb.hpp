@@ -28,6 +28,12 @@ public:
 
     static TCB *running;
 
+    static TCB *kernel;
+
+    void *operator new(size_t size) { return __mem_alloc(size); }
+
+    void operator delete(void *ptr) { __mem_free(ptr); }
+
 private:
     TCB(Body body, uint64 timeSlice) :
             body(body),

@@ -38,7 +38,7 @@ public:
     // write register stval
     static void w_stval(uint64 stval);
 
-    enum BitMaskSip
+    enum BitMaskSip: uint64
     {
         SIP_SSIP = (1 << 1),
         SIP_STIP = (1 << 5),
@@ -57,7 +57,7 @@ public:
     // write register sip
     static void w_sip(uint64 sip);
 
-    enum BitMaskSstatus
+    enum BitMaskSstatus: uint64
     {
         SSTATUS_SIE = (1 << 1),
         SSTATUS_SPIE = (1 << 5),
@@ -78,6 +78,8 @@ public:
 
     // supervisor trap
     static void supervisorTrap();
+
+    static uint64 restorePrivilege(uint64);
 
 private:
 

@@ -6,6 +6,7 @@
 
 void Riscv::popSppSpie()
 {
+    mc_sstatus(SSTATUS_SPP);
     __asm__ volatile ("csrw sepc, ra");
     __asm__ volatile ("sret");
 }
@@ -16,6 +17,13 @@ enum Interrupts: uint64 {
     ECALL_USER  = 0x0000000000000008UL,
     HARDWARE    = 0x8000000000000009UL
 };
+
+inline uint64 Riscv::restorePrivilege(uint64 sstatus)
+{
+    return (TCB::kernel == TCB::running) ?
+           sstatus | SSTATUS_SPP :
+           sstatus & ~(SSTATUS_SPP);
+}
 
 inline void Riscv::unexpectedTrap()
 {
@@ -51,7 +59,7 @@ void Riscv::handleSupervisorTrap()
         uint64 sstatus = r_sstatus();
         TCB::timeSliceCounter = 0;
         TCB::dispatch();
-        w_sstatus(sstatus);
+        w_sstatus(restorePrivilege(sstatus));
         w_sepc(sepc);
     }
     else if (scause == SOFTWARE)
@@ -64,7 +72,7 @@ void Riscv::handleSupervisorTrap()
             uint64 sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
-            w_sstatus(sstatus);
+            w_sstatus(restorePrivilege(sstatus));
             w_sepc(sepc);
         }
         mc_sip(SIP_SSIP);

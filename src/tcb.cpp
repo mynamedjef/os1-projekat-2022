@@ -7,6 +7,8 @@
 
 TCB *TCB::running = nullptr;
 
+TCB *TCB::kernel = nullptr;
+
 uint64 TCB::timeSliceCounter = 0;
 
 TCB *TCB::createThread(Body body)
