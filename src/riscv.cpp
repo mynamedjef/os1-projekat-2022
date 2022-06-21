@@ -1,6 +1,3 @@
-//
-// Created by marko on 20.4.22..
-//
 
 #include "../h/riscv.hpp"
 #include "../h/tcb.hpp"
@@ -12,10 +9,17 @@ void Riscv::popSppSpie()
     __asm__ volatile ("sret");
 }
 
+enum Interrupts: uint64 {
+    SOFTWARE    = 0x8000000000000001UL,
+    ECALL_SUPER = 0x0000000000000009UL,
+    ECALL_USER  = 0x0000000000000008UL,
+    HARDWARE    = 0x8000000000000009UL
+};
+
 void Riscv::handleSupervisorTrap()
 {
     uint64 scause = r_scause();
-    if (scause == 0x0000000000000008UL || scause == 0x0000000000000009UL)
+    if (scause == ECALL_SUPER || scause == ECALL_USER)
     {
         // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
         uint64 sepc = r_sepc() + 4;
@@ -24,7 +28,8 @@ void Riscv::handleSupervisorTrap()
         TCB::dispatch();
         w_sstatus(sstatus);
         w_sepc(sepc);
-    } else if (scause == 0x8000000000000001UL)
+    }
+    else if (scause == SOFTWARE)
     {
         // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
         TCB::timeSliceCounter++;
@@ -38,11 +43,13 @@ void Riscv::handleSupervisorTrap()
             w_sepc(sepc);
         }
         mc_sip(SIP_SSIP);
-    } else if (scause == 0x8000000000000009UL)
+    }
+    else if (scause == HARDWARE)
     {
         // interrupt: yes; cause code: supervisor external interrupt (PLIC; could be keyboard)
         console_handler();
-    } else
+    }
+    else
     {
         // unexpected trap cause
     }

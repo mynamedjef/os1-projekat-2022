@@ -1,6 +1,3 @@
-//
-// Created by marko on 20.4.22..
-//
 
 #include "../h/scheduler.hpp"
 
@@ -14,4 +11,9 @@ TCB *Scheduler::get()
 void Scheduler::put(TCB *ccb)
 {
     readyThreadQueue.addLast(ccb);
+}
+
+int Scheduler::size()
+{
+    return readyThreadQueue.size();
 }

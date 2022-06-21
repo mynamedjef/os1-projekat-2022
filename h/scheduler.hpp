@@ -1,9 +1,6 @@
-//
-// Created by marko on 20.4.22..
-//
 
-#ifndef OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_SCHEDULER_HPP
-#define OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_SCHEDULER_HPP
+#ifndef _scheduler_hpp
+#define _scheduler_hpp
 
 #include "list.hpp"
 
@@ -19,6 +16,8 @@ public:
 
     static void put(TCB *ccb);
 
+    static int size();
+
 };
 
-#endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_SCHEDULER_HPP
+#endif //_scheduler_hpp
