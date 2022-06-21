@@ -80,3 +80,22 @@ void printInt(int xx, int base, int sgn)
 
     UNLOCK();
 }
+
+void printLong(uint64 x)
+{
+    LOCK();
+    int base = 10;
+
+    char buf[16];
+    int i;
+
+    i = 0;
+    do{
+        buf[i++] = digits[x % base];
+    }while((x /= base) != 0);
+
+    while(--i >= 0)
+        __putc(buf[i]);
+
+    UNLOCK();
+}

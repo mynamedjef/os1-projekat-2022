@@ -2,6 +2,7 @@
 #include "../h/riscv.hpp"
 #include "../h/tcb.hpp"
 #include "../lib/console.h"
+#include "../h/printing.hpp"
 
 void Riscv::popSppSpie()
 {
@@ -15,6 +16,30 @@ enum Interrupts: uint64 {
     ECALL_USER  = 0x0000000000000008UL,
     HARDWARE    = 0x8000000000000009UL
 };
+
+inline void Riscv::unexpectedTrap()
+{
+    uint64 scause = r_scause();
+    uint64 stval = r_stval();
+    uint64 stvec = r_stvec();
+    uint64 sepc = r_sepc();
+
+    printString("scause: ");
+    printLong(scause);
+    printString("\n");
+
+    printString("stval: ");
+    printLong(stval);
+    printString("\n");
+
+    printString("stvec: ");
+    printLong(stvec);
+    printString("\n");
+
+    printString("sepc: ");
+    printLong(sepc);
+    printString("\n");
+}
 
 void Riscv::handleSupervisorTrap()
 {
@@ -52,5 +77,6 @@ void Riscv::handleSupervisorTrap()
     else
     {
         // unexpected trap cause
+        unexpectedTrap();
     }
 }
