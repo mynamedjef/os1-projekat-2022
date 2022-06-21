@@ -1,9 +1,8 @@
-//
-// Created by marko on 20.4.22..
-//
 
-#ifndef OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_LIST_HPP
-#define OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_LIST_HPP
+#ifndef _list_hpp
+#define _list_hpp
+
+#include "../lib/mem.h"
 
 template<typename T>
 class List
@@ -15,20 +14,56 @@ private:
         Elem *next;
 
         Elem(T *data, Elem *next) : data(data), next(next) {}
+        
+        void *operator new(size_t size) { return __mem_alloc(size); }
+        void operator delete(void *ptr) { __mem_free(ptr); }
     };
 
     Elem *head, *tail;
+    unsigned count;
+    
+    // ubacuje element data posle elementa node. ako je node null, ne radi ništa.
+    void insertAfter(Elem *node, T *data)
+    {
+        if (!node) return;
+        count++;
+        Elem *next = node->next;
+        node->next = new Elem(data, next);
+    }
 
 public:
-    List() : head(0), tail(0) {}
+    List() : head(0), tail(0), count(0) {}
 
     List(const List<T> &) = delete;
 
     List<T> &operator=(const List<T> &) = delete;
+    
+    unsigned size() const { return count; }
+    
+    // dodaje u listu po prioritetu zadatom u Comparator(...) koji se redefiniše u podklasi. podrazumevano dodaje na kraj liste
+    void addPriority(T *data)
+    {
+        if (!head || Comparator(data, head->data))
+        {
+            addFirst(data);
+        }
+        else
+        {
+            Elem *prev = head;
+            for (Elem *curr = head->next; curr; curr = curr->next) {
+                if (Comparator(data, curr->data)) {
+                    insertAfter(prev, data);
+                }
+                prev = curr;
+            }
+            addLast(data);
+        }
+    }
 
     void addFirst(T *data)
     {
         Elem *elem = new Elem(data, head);
+        count++;
         head = elem;
         if (!tail) { tail = head; }
     }
@@ -36,6 +71,7 @@ public:
     void addLast(T *data)
     {
         Elem *elem = new Elem(data, 0);
+        count++;
         if (tail)
         {
             tail->next = elem;
@@ -50,6 +86,7 @@ public:
     {
         if (!head) { return 0; }
 
+        count--;
         Elem *elem = head;
         head = head->next;
         if (!head) { tail = 0; }
@@ -69,6 +106,7 @@ public:
     {
         if (!head) { return 0; }
 
+        count--;
         Elem *prev = 0;
         for (Elem *curr = head; curr && curr != tail; curr = curr->next)
         {
@@ -90,6 +128,10 @@ public:
         if (!tail) { return 0; }
         return tail->data;
     }
+    
+protected:
+    bool Comparator(T *t1, T *t2) { return false; }
+    
 };
 
-#endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_LIST_HPP
+#endif //_list_hpp
