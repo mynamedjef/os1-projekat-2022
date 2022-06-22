@@ -16,7 +16,7 @@ int main()
     TCB *user = TCB::createThread(userMain);
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
-    Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
+    Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
     while (!user->isFinished()) {
         TCB::yield();

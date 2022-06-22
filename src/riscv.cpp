@@ -18,11 +18,11 @@ enum Interrupts: uint64 {
     HARDWARE    = 0x8000000000000009UL
 };
 
-inline uint64 Riscv::restorePrivilege(uint64 sstatus)
+uint64 Riscv::restorePrivilege(uint64 sstatus)
 {
     return (TCB::kernel == TCB::running) ?
-           sstatus | SSTATUS_SPP :
-           sstatus & ~(SSTATUS_SPP);
+        sstatus | SSTATUS_SPP :
+        sstatus & ~(SSTATUS_SPP);
 }
 
 inline void Riscv::unexpectedTrap()
@@ -59,7 +59,8 @@ void Riscv::handleSupervisorTrap()
         uint64 sstatus = r_sstatus();
         TCB::timeSliceCounter = 0;
         TCB::dispatch();
-        w_sstatus(restorePrivilege(sstatus));
+        sstatus = restorePrivilege(sstatus);
+        w_sstatus(sstatus);
         w_sepc(sepc);
     }
     else if (scause == SOFTWARE)
@@ -72,7 +73,8 @@ void Riscv::handleSupervisorTrap()
             uint64 sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
-            w_sstatus(restorePrivilege(sstatus));
+            sstatus = restorePrivilege(sstatus);
+            w_sstatus(sstatus);
             w_sepc(sepc);
         }
         mc_sip(SIP_SSIP);
