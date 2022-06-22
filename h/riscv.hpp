@@ -83,6 +83,18 @@ public:
 
 private:
 
+    static uint64 r_opcode();
+
+    static uint64 r_arg1();
+
+    static uint64 r_arg2();
+
+    static uint64 r_arg3();
+
+    static uint64 r_arg4();
+
+    static void w_retval(uint64);
+
     // supervisor trap handler
     static void handleSupervisorTrap();
 
@@ -182,4 +194,43 @@ inline void Riscv::w_sstatus(uint64 sstatus)
     __asm__ volatile ("csrw sstatus, %[sstatus]" : : [sstatus] "r"(sstatus));
 }
 
+inline uint64 Riscv::r_opcode()
+{
+    uint64 volatile opcode;
+    __asm__ volatile ("mv %0, a0" : "=r" (opcode));
+    return opcode;
+}
+
+inline uint64 Riscv::r_arg1()
+{
+    uint64 volatile a1;
+    __asm__ volatile ("mv %0, a1" : "=r" (a1));
+    return a1;
+}
+
+inline uint64 Riscv::r_arg2()
+{
+    uint64 volatile a2;
+    __asm__ volatile ("mv %0, a2" : "=r" (a2));
+    return a2;
+}
+
+inline uint64 Riscv::r_arg3()
+{
+    uint64 volatile a3;
+    __asm__ volatile ("mv %0, a3" : "=r" (a3));
+    return a3;
+}
+
+inline uint64 Riscv::r_arg4()
+{
+    uint64 volatile a4;
+    __asm__ volatile ("mv %0, a4" : "=r" (a4));
+    return a4;
+}
+
+inline void Riscv::w_retval(uint64 ret)
+{
+    __asm__ volatile ("mv a0, %0" : : "r" (ret));
+}
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_RISCV_HPP
