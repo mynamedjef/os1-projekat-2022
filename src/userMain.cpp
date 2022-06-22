@@ -26,7 +26,7 @@ void userMain()
              threads[2]->isFinished() &&
              threads[3]->isFinished()))
     {
-        TCB::yield();
+        thread_dispatch();
     }
     
     for (auto &thread: threads)

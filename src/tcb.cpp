@@ -4,6 +4,7 @@
 
 #include "../h/tcb.hpp"
 #include "../h/riscv.hpp"
+#include "../h/syscall_c.h"
 
 TCB *TCB::running = nullptr;
 
@@ -14,11 +15,6 @@ uint64 TCB::timeSliceCounter = 0;
 TCB *TCB::createThread(Body body)
 {
     return new TCB(body, TIME_SLICE);
-}
-
-void TCB::yield()
-{
-    __asm__ volatile ("ecall");
 }
 
 void TCB::dispatch()
@@ -35,5 +31,5 @@ void TCB::threadWrapper()
     Riscv::popSppSpie();
     running->body();
     running->setFinished(true);
-    TCB::yield();
+    thread_dispatch();
 }

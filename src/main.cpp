@@ -19,7 +19,7 @@ int main()
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
     while (!user->isFinished()) {
-        TCB::yield();
+        thread_dispatch();
     }
 
     delete kernel;

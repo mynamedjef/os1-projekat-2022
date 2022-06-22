@@ -24,8 +24,6 @@ public:
 
     static TCB *createThread(Body body);
 
-    static void yield();
-
     static TCB *running;
 
     static TCB *kernel;

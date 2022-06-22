@@ -3,6 +3,7 @@
 #include "../h/tcb.hpp"
 #include "../lib/console.h"
 #include "../h/printing.hpp"
+#include "../h/opcodes.hpp"
 
 void Riscv::popSppSpie()
 {
@@ -52,14 +53,19 @@ inline void Riscv::unexpectedTrap()
 void Riscv::handleSupervisorTrap()
 {
     uint64 scause = r_scause();
-    if (scause == ECALL_SUPER || scause == ECALL_USER)
+    if (scause == ECALL_USER || scause == ECALL_SUPER)
     {
         // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
         uint64 sepc = r_sepc() + 4;
         uint64 sstatus = r_sstatus();
-        TCB::timeSliceCounter = 0;
-        TCB::dispatch();
-        sstatus = restorePrivilege(sstatus);
+
+        uint64 opcode = r_opcode();
+        if (opcode == THREAD_DISPATCH)
+        {
+            TCB::timeSliceCounter = 0;
+            TCB::dispatch();
+            sstatus = restorePrivilege(sstatus);
+        }
         w_sstatus(sstatus);
         w_sepc(sepc);
     }

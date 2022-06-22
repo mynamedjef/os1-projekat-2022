@@ -17,3 +17,10 @@ inline uint64 retval()
     __asm__ volatile ("mv %0, a0" : "=r" (ret));
     return ret;
 }
+
+// ============= sistemski pozivi ==============
+
+void thread_dispatch()
+{
+    invoke(THREAD_DISPATCH);
+}
