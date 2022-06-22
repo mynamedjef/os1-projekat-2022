@@ -66,6 +66,11 @@ void Riscv::handleSupervisorTrap()
             void *ret = __mem_alloc(size);
             w_retval((uint64)ret);
         }
+        else if (opcode == MEM_FREE)
+        {
+            void *ptr = (void*)r_arg1();
+            w_retval((uint64)__mem_free(ptr));
+        }
         else if (opcode == THREAD_DISPATCH)
         {
             TCB::timeSliceCounter = 0;
