@@ -60,7 +60,13 @@ void Riscv::handleSupervisorTrap()
         uint64 sstatus = r_sstatus();
 
         uint64 opcode = r_opcode();
-        if (opcode == THREAD_DISPATCH)
+        if (opcode == MEM_ALLOC)
+        {
+            size_t volatile size = r_arg1() * MEM_BLOCK_SIZE;
+            void *ret = __mem_alloc(size);
+            w_retval((uint64)ret);
+        }
+        else if (opcode == THREAD_DISPATCH)
         {
             TCB::timeSliceCounter = 0;
             TCB::dispatch();

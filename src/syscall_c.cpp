@@ -20,6 +20,17 @@ inline uint64 retval()
 
 // ============= sistemski pozivi ==============
 
+void *mem_alloc(size_t size)
+{
+    if (!size) { return nullptr; }
+    size_t blocks = (size % MEM_BLOCK_SIZE == 0) ?
+                    size / MEM_BLOCK_SIZE :
+                    1 + size / MEM_BLOCK_SIZE;
+    __asm__ volatile ("mv a1, %0" : : "r" (blocks));
+    invoke(MEM_ALLOC);
+    return (void*)retval();
+}
+
 void thread_dispatch()
 {
     invoke(THREAD_DISPATCH);
