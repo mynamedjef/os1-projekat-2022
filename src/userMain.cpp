@@ -6,19 +6,19 @@
 #include "../h/workers.hpp"
 #include "../h/printing.hpp"
 
-void userMain()
+void userMain(void*)
 {
     printString("userMain() started\n");
     
     TCB *threads[4];
     
-    threads[0] = TCB::createThread(workerBodyA);
+    threads[0] = TCB::createThread(workerBodyA, nullptr, new uint64[DEFAULT_STACK_SIZE]);
     printString("ThreadA created\n");
-    threads[1] = TCB::createThread(workerBodyB);
+    threads[1] = TCB::createThread(workerBodyB, nullptr, new uint64[DEFAULT_STACK_SIZE]);
     printString("ThreadB created\n");
-    threads[2] = TCB::createThread(workerBodyC);
+    threads[2] = TCB::createThread(workerBodyC, nullptr, new uint64[DEFAULT_STACK_SIZE]);
     printString("ThreadC created\n");
-    threads[3] = TCB::createThread(workerBodyD);
+    threads[3] = TCB::createThread(workerBodyD, nullptr, new uint64[DEFAULT_STACK_SIZE]);
     printString("ThreadD created\n");
 
     while (!(threads[0]->isFinished() &&

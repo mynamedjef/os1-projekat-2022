@@ -12,38 +12,62 @@
 class TCB
 {
 public:
+    enum Status
+    {
+        FINISHED,
+        RUNNING,
+        READY,
+        CREATED
+    };
+
     ~TCB() { delete[] stack; }
 
-    bool isFinished() const { return finished; }
+    bool isFinished() const { return status == FINISHED; }
 
-    void setFinished(bool value) { finished = value; }
+    void setStatus(Status st) { status = st; }
 
     uint64 getTimeSlice() const { return timeSlice; }
 
-    using Body = void (*)();
+    using Body = void (*)(void*);
 
-    static TCB *createThread(Body body);
+    // pravi nit i započinje je odmah
+    static TCB *createThread(Body, void*, uint64*);
+
+    // pravi nit koja čeka da bude pokrenuta sa .start()
+    static TCB *initThread(Body, void*, uint64*);
+
+    static TCB *kernelThread();
 
     static TCB *running;
 
     static TCB *kernel;
+
+    int start();
 
     void *operator new(size_t size) { return __mem_alloc(size); }
 
     void operator delete(void *ptr) { __mem_free(ptr); }
 
 private:
-    TCB(Body body, uint64 timeSlice) :
+    TCB(Body body, void *arg, uint64 *stack) :
             body(body),
-            stack(body != nullptr ? new uint64[STACK_SIZE] : nullptr),
+            arg(arg),
+            stack(stack),
             context({(uint64) &threadWrapper,
-                     stack != nullptr ? (uint64) &stack[STACK_SIZE] : 0
+                     (uint64) &stack[DEFAULT_STACK_SIZE]
                     }),
-            timeSlice(timeSlice),
-            finished(false)
-    {
-        if (body != nullptr) { Scheduler::put(this); }
-    }
+            timeSlice(DEFAULT_TIME_SLICE),
+            status(CREATED)
+    { }
+
+    TCB() :
+            body(nullptr),
+            arg(nullptr),
+            stack(nullptr),
+            context({0, 0}),
+            timeSlice(DEFAULT_TIME_SLICE),
+            status(RUNNING)
+    { }
 
     struct Context
     {
@@ -52,10 +76,11 @@ private:
     };
 
     Body body;
+    void *arg;
     uint64 *stack;
     Context context;
     uint64 timeSlice;
-    bool finished;
+    Status status;
 
     friend class Riscv;
 
@@ -66,9 +91,6 @@ private:
     static void dispatch();
 
     static uint64 timeSliceCounter;
-
-    static uint64 constexpr STACK_SIZE = 1024;
-    static uint64 constexpr TIME_SLICE = 2;
 };
 
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_TCB_HPP

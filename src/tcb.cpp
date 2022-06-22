@@ -12,16 +12,48 @@ TCB *TCB::kernel = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
-TCB *TCB::createThread(Body body)
+TCB *TCB::createThread(Body body, void *arg, uint64 *stack)
 {
-    return new TCB(body, TIME_SLICE);
+    TCB *thr = initThread(body, arg, stack);
+    thr->status = READY;
+    Scheduler::put(thr);
+    return thr;
+}
+
+TCB *TCB::initThread(Body body, void *arg, uint64 *stack)
+{
+    return new TCB(body, arg, stack);
+}
+
+TCB *TCB::kernelThread()
+{
+    if (!kernel) {
+        TCB *thr = new TCB();
+        running = kernel = thr;
+    }
+    return kernel;
+}
+
+int TCB::start()
+{
+    if (status != CREATED) {
+        return -1;
+    }
+    status = READY;
+    Scheduler::put(this);
+    return 0;
 }
 
 void TCB::dispatch()
 {
     TCB *old = running;
-    if (!old->isFinished()) { Scheduler::put(old); }
+    if (old->status == RUNNING) {
+        old->status = READY;
+        Scheduler::put(old);
+    }
+
     running = Scheduler::get();
+    running->status = RUNNING;
 
     TCB::contextSwitch(&old->context, &running->context);
 }
@@ -29,7 +61,7 @@ void TCB::dispatch()
 void TCB::threadWrapper()
 {
     Riscv::popSppSpie();
-    running->body();
-    running->setFinished(true);
+    running->body(running->arg);
+    running->setStatus(FINISHED);
     thread_dispatch();
 }
