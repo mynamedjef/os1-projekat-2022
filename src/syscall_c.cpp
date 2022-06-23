@@ -63,6 +63,12 @@ int thread_create(thread_t *handle, void (*start_routine)(void*), void *arg)
     return thread_create_helper(handle, start_routine, arg, stack);
 }
 
+int thread_exit()
+{
+    invoke(THREAD_EXIT);
+    return (retval() == 0) ? 0 : -1;
+}
+
 void thread_dispatch()
 {
     invoke(THREAD_DISPATCH);

@@ -96,6 +96,10 @@ void Riscv::handleSupervisorTrap()
 
             w_retval(0);
         }
+        else if (opcode == THREAD_EXIT)
+        {
+            w_retval(TCB::exit());
+        }
         w_sstatus(sstatus);
         w_sepc(sepc);
     }

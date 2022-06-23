@@ -44,6 +44,16 @@ int TCB::start()
     return 0;
 }
 
+int TCB::exit()
+{
+    if (running->status != RUNNING) {
+        return -1;
+    }
+    running->status = FINISHED;
+    dispatch();
+    return 0;
+}
+
 void TCB::dispatch()
 {
     TCB *old = running;
