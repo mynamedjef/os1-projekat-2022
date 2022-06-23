@@ -88,6 +88,8 @@ private:
 
     friend class _sem;
 
+    friend class _sleeplist;
+
     static void threadWrapper();
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
@@ -102,6 +104,12 @@ private:
 
     // nit se otpušta sa čekanja sa semafora
     int release();
+
+    // uspavljuje trenutnu nit na time_t otkucaja tajmera
+    static int sleep(time_t);
+    
+    // budi nit
+    int wake();
 
     static uint64 timeSliceCounter;
 };

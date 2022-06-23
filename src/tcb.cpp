@@ -5,6 +5,7 @@
 #include "../h/tcb.hpp"
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.h"
+#include "../h/_sleeplist.hpp"
 
 TCB *TCB::running = nullptr;
 
@@ -94,4 +95,25 @@ void TCB::threadWrapper()
     running->body(running->arg);
     running->setStatus(FINISHED);
     thread_dispatch();
+}
+
+int TCB::sleep(time_t timeout)
+{
+    if (running->status != RUNNING) {
+        return -1;
+    }
+    running->status = SLEEPING;
+    _sleeplist::insert(running, timeout);
+    dispatch();
+    return 0;
+}
+
+int TCB::wake()
+{
+    if (status != SLEEPING) {
+        return -1;
+    }
+    status = READY;
+    Scheduler::put(this);
+    return 0;
 }
