@@ -5,6 +5,7 @@
 #include "../h/printing.hpp"
 #include "../h/opcodes.hpp"
 #include "../h/_thread.hpp"
+#include "../h/_sem.hpp"
 
 void Riscv::popSppSpie()
 {
@@ -100,6 +101,31 @@ void Riscv::handleSupervisorTrap()
         {
             w_retval(TCB::exit());
         }
+        else if (opcode == SEM_OPEN)
+        {
+            sem_t *handle = (sem_t*)args[1];
+            unsigned init = (unsigned)args[2];
+
+            new _sem(handle, init);
+
+            w_retval(0);
+        }
+        else if (opcode == SEM_CLOSE)
+        {
+            sem_t handle = (sem_t)args[1];
+            w_retval(handle->close());
+        }
+        else if (opcode == SEM_WAIT)
+        {
+            sem_t handle = (sem_t)args[1];
+            w_retval(handle->wait());
+        }
+        else if (opcode == SEM_SIGNAL)
+        {
+            sem_t handle = (sem_t)args[1];
+            w_retval(handle->signal());
+        }
+
         w_sstatus(sstatus);
         w_sepc(sepc);
     }

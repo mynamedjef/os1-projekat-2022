@@ -36,6 +36,8 @@ int thread_create_helper(thread_t *handle, void (*start_routine)(void*), void *a
 
 // ============= sistemski pozivi ==============
 
+// ----------------- memorija ------------------
+
 void *mem_alloc(size_t size)
 {
     if (!size) { return nullptr; }
@@ -55,6 +57,8 @@ int mem_free(void *ptr)
     return (retval() == 0) ? 0 : -1;
 }
 
+// ------------------- niti --------------------
+
 int thread_create(thread_t *handle, void (*start_routine)(void*), void *arg)
 {
     if (!handle) { return -1; }
@@ -72,4 +76,38 @@ int thread_exit()
 void thread_dispatch()
 {
     invoke(THREAD_DISPATCH);
+}
+
+// ---------------- semafori -------------------
+
+int sem_open(sem_t *handle, unsigned init)
+{
+    if (!handle) { return -1; }
+    load_args();
+    invoke(SEM_OPEN);
+    return (retval() == 0) ? 0 : -2;
+}
+
+int sem_close(sem_t handle)
+{
+    if (!handle) { return -1; }
+    load_args();
+    invoke(SEM_CLOSE);
+    return (retval() == 0) ? 0 : -2;
+}
+
+int sem_wait(sem_t handle)
+{
+    if (!handle) { return -1; }
+    load_args();
+    invoke(SEM_WAIT);
+    return (retval() == 0) ? 0 : -2;
+}
+
+int sem_signal(sem_t handle)
+{
+    if (!handle) { return -1; }
+    load_args();
+    invoke(SEM_SIGNAL);
+    return (retval() == 0) ? 0 : -2;
 }
