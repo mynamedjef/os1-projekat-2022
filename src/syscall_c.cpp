@@ -26,6 +26,14 @@ inline uint64 retval()
     return ret;
 }
 
+// iz nekog razloga se arg ne prenosi dobro nakon alociranja steka pa je potrebna ova međufunkcija
+int thread_create_helper(thread_t *handle, void (*start_routine)(void*), void *arg, void *stack_space)
+{
+    load_args();
+    invoke(THREAD_CREATE);
+    return (retval() == 0) ? 0 : -3;
+}
+
 // ============= sistemski pozivi ==============
 
 void *mem_alloc(size_t size)
@@ -45,6 +53,14 @@ int mem_free(void *ptr)
     load_args();
     invoke(MEM_FREE);
     return (retval() == 0) ? 0 : -1;
+}
+
+int thread_create(thread_t *handle, void (*start_routine)(void*), void *arg)
+{
+    if (!handle) { return -1; }
+    void *stack = mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
+    if (!stack) { return -2; }
+    return thread_create_helper(handle, start_routine, arg, stack);
 }
 
 void thread_dispatch()
