@@ -100,7 +100,9 @@ void Riscv::handleSupervisorTrap()
         }
         else if (opcode == THREAD_EXIT)
         {
-            w_retval(TCB::exit());
+            int val = TCB::exit();
+            sstatus = restorePrivilege(sstatus);
+            w_retval(val);
         }
         else if (opcode == SEM_OPEN)
         {
@@ -119,7 +121,9 @@ void Riscv::handleSupervisorTrap()
         else if (opcode == SEM_WAIT)
         {
             sem_t handle = (sem_t)args[1];
-            w_retval(handle->wait());
+            int ret = handle->wait();
+            sstatus = restorePrivilege(sstatus);
+            w_retval(ret);
         }
         else if (opcode == SEM_SIGNAL)
         {
@@ -129,7 +133,9 @@ void Riscv::handleSupervisorTrap()
         else if (opcode == TIME_SLEEP)
         {
             time_t timeout = (time_t)args[1];
-            w_retval(TCB::sleep(timeout));
+            int ret = TCB::sleep(timeout);
+            sstatus = restorePrivilege(sstatus);
+            w_retval(ret);
         }
 
         w_sstatus(sstatus);
