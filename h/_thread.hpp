@@ -12,11 +12,7 @@ class _thread {
 public:
     using Body = void(*)(void*);
 
-    _thread(thread_t *handle, Body start_routine, void *arg, uint64 *stack_space)
-    {
-        parent = TCB::initThread(start_routine, arg, stack_space);
-        *handle = this;
-    }
+    ~_thread() { delete parent; };
 
     bool isFinished() const { return parent->isFinished(); }
 
@@ -28,6 +24,12 @@ private:
     TCB *parent;
 
     int start() { return parent->start(); }
+
+    _thread(thread_t *handle, Body start_routine, void *arg, uint64 *stack_space)
+    {
+        parent = TCB::initThread(start_routine, arg, stack_space);
+        *handle = this;
+    }
 
     friend class Riscv;
 
