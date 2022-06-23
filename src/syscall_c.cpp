@@ -120,3 +120,9 @@ int time_sleep(time_t timeout)
     invoke(TIME_SLEEP);
     return (retval() == 0) ? 0 : -1;
 }
+
+char getc()
+{
+    invoke(GETC);
+    return (char)retval();
+}

@@ -79,6 +79,8 @@ public:
     // supervisor trap
     static void supervisorTrap();
 
+    static void consoleTrap();
+
     static uint64 restorePrivilege(uint64);
 
 private:
@@ -87,6 +89,8 @@ private:
 
     // supervisor trap handler
     static void handleSupervisorTrap();
+
+    static void handleConsoleTrap();
 
     static void unexpectedTrap();
 

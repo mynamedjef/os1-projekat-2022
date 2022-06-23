@@ -137,6 +137,13 @@ void Riscv::handleSupervisorTrap()
             sstatus = restorePrivilege(sstatus);
             w_retval(ret);
         }
+        else if (opcode == GETC)
+        {
+            w_stvec((uint64) &Riscv::consoleTrap);
+            char c = __getc();
+            w_stvec((uint64) &Riscv::supervisorTrap);
+            w_retval(c);
+        }
 
         w_sstatus(sstatus);
         w_sepc(sepc);
@@ -168,4 +175,25 @@ void Riscv::handleSupervisorTrap()
         // unexpected trap cause
         unexpectedTrap();
     }
+}
+
+void Riscv::handleConsoleTrap()
+{
+    uint64 scause = r_scause();
+    uint64 sstatus = r_sstatus();
+    if (scause == SOFTWARE)
+    {
+        _sleeplist::tick();
+        mc_sip(SIP_SSIP);
+    }
+    else if (scause == HARDWARE)
+    {
+        console_handler();
+    }
+    else
+    {
+        unexpectedTrap();
+    }
+    sstatus |= SSTATUS_SPP;
+    w_sstatus(sstatus);
 }
