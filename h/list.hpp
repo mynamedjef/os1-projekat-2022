@@ -7,7 +7,7 @@
 template<typename T>
 class List
 {
-private:
+protected:
     struct Elem
     {
         T *data;
@@ -40,26 +40,6 @@ public:
     
     unsigned size() const { return count; }
     
-    // dodaje u listu po prioritetu zadatom u Comparator(...) koji se redefiniše u podklasi. podrazumevano dodaje na kraj liste
-    void addPriority(T *data)
-    {
-        if (!head || Comparator(data, head->data))
-        {
-            addFirst(data);
-        }
-        else
-        {
-            Elem *prev = head;
-            for (Elem *curr = head->next; curr; curr = curr->next) {
-                if (Comparator(data, curr->data)) {
-                    insertAfter(prev, data);
-                }
-                prev = curr;
-            }
-            addLast(data);
-        }
-    }
-
     void addFirst(T *data)
     {
         Elem *elem = new Elem(data, head);
@@ -128,10 +108,6 @@ public:
         if (!tail) { return 0; }
         return tail->data;
     }
-    
-protected:
-    bool Comparator(T *t1, T *t2) { return false; }
-    
 };
 
 #endif //_list_hpp
