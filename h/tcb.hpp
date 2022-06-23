@@ -17,7 +17,9 @@ public:
         FINISHED,
         RUNNING,
         READY,
-        CREATED
+        CREATED,
+        WAITING,
+        SLEEPING
     };
 
     ~TCB() { delete[] stack; }
@@ -84,13 +86,22 @@ private:
 
     friend class Riscv;
 
+    friend class _sem;
+
     static void threadWrapper();
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
 
     static void dispatch();
 
+    // gasi trenutnu nit
     static int exit();
+
+    // trenutna nit čeka na semaforu
+    static int wait();
+
+    // nit se otpušta sa čekanja sa semafora
+    int release();
 
     static uint64 timeSliceCounter;
 };

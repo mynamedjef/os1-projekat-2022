@@ -54,6 +54,26 @@ int TCB::exit()
     return 0;
 }
 
+int TCB::wait()
+{
+    if (running->status != RUNNING) {
+        return -1;
+    }
+    running->status = WAITING;
+    dispatch();
+    return 0;
+}
+
+int TCB::release()
+{
+    if (status != WAITING) {
+        return -1;
+    }
+    status = READY;
+    Scheduler::put(this);
+    return 0;
+}
+
 void TCB::dispatch()
 {
     TCB *old = running;
