@@ -8,16 +8,26 @@
 #include "../h/userMain.hpp"
 #include "../h/_thread.hpp"
 #include "../h/_sleeplist.hpp"
+#include "../h/_buffer.hpp"
+#include "../lib/console.h"
 
 int main()
 {
-    printString("main() started\n");
+//    printString("main() started\n");
 
-    TCB *kernel = TCB::kernelThread();
-    TCB *idle = TCB::idleThread();
+    TCB *kernel =
+            TCB::kernelThread();
+    TCB *idle =
+            TCB::idleThread();
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
+    
+    time_sleep(50);
+    
+    while (true) {
+
+    }
 
     thread_t user;
     thread_create(&user, userMain, (void*)1337);

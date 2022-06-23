@@ -7,6 +7,7 @@
 #include "../h/_thread.hpp"
 #include "../h/_sem.hpp"
 #include "../h/_sleeplist.hpp"
+#include "../h/_buffer.hpp"
 
 void Riscv::popSppSpie()
 {
@@ -144,6 +145,10 @@ void Riscv::handleSupervisorTrap()
             w_stvec((uint64) &Riscv::supervisorTrap);
             w_retval(c);
         }
+        else if (opcode == PUTC)
+        {
+            __putc((char)args[1]);
+        }
 
         w_sstatus(sstatus);
         w_sepc(sepc);
@@ -167,8 +172,23 @@ void Riscv::handleSupervisorTrap()
     }
     else if (scause == HARDWARE)
     {
-        // interrupt: yes; cause code: supervisor external interrupt (PLIC; could be keyboard)
-        console_handler();
+//        console_handler(); /*
+        int volatile irq = plic_claim();
+        if (irq == 0x0a) {
+            char *status = (char*)CONSOLE_STATUS;
+            char *rcv = (char*)CONSOLE_RX_DATA;
+
+            while (*status & CONSOLE_RX_STATUS_BIT) {
+                _buffer::insert(*rcv);
+            }
+        }
+        plic_complete(irq); /* //
+        uint64 volatile sepc = r_sepc();
+        w_stvec((uint64) &Riscv::consoleTrap);
+        __asm__ volatile ("ecall");
+        w_stvec((uint64) &Riscv::supervisorTrap);
+        w_sepc(sepc);
+//         */
     }
     else
     {
@@ -186,9 +206,27 @@ void Riscv::handleConsoleTrap()
         _sleeplist::tick();
         mc_sip(SIP_SSIP);
     }
-    else if (scause == HARDWARE)
+    else if (scause == ECALL_SUPER || scause == ECALL_USER)
     {
-        console_handler();
+        uint64 sepc = r_sepc() + 4;
+
+        int volatile irq = plic_claim();
+        if (irq == 0x0a) {
+//            char *status = (char*)CONSOLE_STATUS;
+//            char *trs = (char*)CONSOLE_TX_DATA;
+//            char *rcv = (char*)CONSOLE_RX_DATA;
+
+//            while (*status & CONSOLE_TX_STATUS_BIT) {
+//                *trs = '6';
+//                *status = *status & ~CONSOLE_TX_STATUS_BIT;
+//            }
+//            while (*status & CONSOLE_RX_STATUS_BIT) {
+//                _buffer::insert(*rcv);
+//            }
+        }
+        plic_complete(irq); // */
+
+        w_sepc(sepc);
     }
     else
     {
