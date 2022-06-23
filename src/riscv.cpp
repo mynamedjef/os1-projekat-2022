@@ -56,8 +56,9 @@ using Body = void(*)(void*);
 void Riscv::handleSupervisorTrap()
 {
     // argumenti se ovde učitavaju jer if-ovi pregaze neke registre (npr. a3,a4)
-    uint64 *arg4 = (uint64*)r_arg4();
-    void *arg3 = (void*)r_arg3();
+    uint64 args[5];
+    loadParams(args);
+
     uint64 scause = r_scause();
     if (scause == ECALL_USER || scause == ECALL_SUPER)
     {
@@ -65,16 +66,16 @@ void Riscv::handleSupervisorTrap()
         uint64 sepc = r_sepc() + 4;
         uint64 sstatus = r_sstatus();
 
-        uint64 opcode = r_opcode();
+        uint64 opcode = args[0];
         if (opcode == MEM_ALLOC)
         {
-            size_t volatile size = r_arg1() * MEM_BLOCK_SIZE;
+            size_t volatile size = args[1] * MEM_BLOCK_SIZE;
             void *ret = __mem_alloc(size);
             w_retval((uint64)ret);
         }
         else if (opcode == MEM_FREE)
         {
-            void *ptr = (void*)r_arg1();
+            void *ptr = (void*)args[2];
             w_retval((uint64)__mem_free(ptr));
         }
         else if (opcode == THREAD_DISPATCH)
@@ -85,12 +86,12 @@ void Riscv::handleSupervisorTrap()
         }
         else if (opcode == THREAD_CREATE)
         {
-            thread_t *handle = (thread_t*)r_arg1();
-            Body routine = (Body)r_arg2();
-            void *arg = arg3;
-            uint64 *stack_space = arg4;
+            thread_t *handle = (thread_t*)args[1];
+            Body routine     = (Body)args[2];
+            void *arg        = (void*)args[3];
+            uint64 *stack    = (uint64*)args[4];
 
-            _thread *t = new _thread(handle, routine, arg, stack_space);
+            _thread *t = new _thread(handle, routine, arg, stack);
             t->start();
 
             w_retval(0);
