@@ -34,6 +34,13 @@ int thread_create_helper(thread_t *handle, void (*start_routine)(void*), void *a
     return (retval() == 0) ? 0 : -3;
 }
 
+int thread_prepare_helper(thread_t *handle, void (*start_routine)(void*), void *arg, void *stack_space)
+{
+    load_args();
+    invoke(THREAD_PREPARE);
+    return (retval() == 0) ? 0 : -3;
+}
+
 // ============= sistemski pozivi ==============
 
 // ----------------- memorija ------------------
@@ -65,6 +72,22 @@ int thread_create(thread_t *handle, void (*start_routine)(void*), void *arg)
     void *stack = mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
     if (!stack) { return -2; }
     return thread_create_helper(handle, start_routine, arg, stack);
+}
+
+int thread_prepare(thread_t *handle, void (*start_routine)(void*), void *arg)
+{
+    if (!handle) { return -1; }
+    void *stack = mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
+    if (!stack) { return -2; }
+    return thread_prepare_helper(handle, start_routine, arg, stack);
+}
+
+int thread_start(thread_t handle)
+{
+    if (!handle) { return -1; }
+    load_args();
+    invoke(THREAD_START);
+    return (retval() == 0) ? 0 : -2;
 }
 
 int thread_exit()

@@ -86,7 +86,7 @@ void Riscv::handleSupervisorTrap()
             TCB::dispatch();
             sstatus = restorePrivilege(sstatus);
         }
-        else if (opcode == THREAD_CREATE)
+        else if (opcode == THREAD_CREATE || opcode == THREAD_PREPARE)
         {
             thread_t *handle = (thread_t*)args[1];
             Body routine     = (Body)args[2];
@@ -94,9 +94,14 @@ void Riscv::handleSupervisorTrap()
             uint64 *stack    = (uint64*)args[4];
 
             _thread *t = new _thread(handle, routine, arg, stack);
-            t->start();
+            if (opcode == THREAD_CREATE) { t->start(); }
 
             w_retval(0);
+        }
+        else if (opcode == THREAD_START)
+        {
+            thread_t handle = (thread_t)args[1];
+            w_retval(handle->start());
         }
         else if (opcode == THREAD_EXIT)
         {
