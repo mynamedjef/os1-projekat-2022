@@ -111,3 +111,12 @@ int sem_signal(sem_t handle)
     invoke(SEM_SIGNAL);
     return (retval() == 0) ? 0 : -2;
 }
+
+// ------------------ ostalo -------------------
+
+int time_sleep(time_t timeout)
+{
+    load_args();
+    invoke(TIME_SLEEP);
+    return (retval() == 0) ? 0 : -1;
+}

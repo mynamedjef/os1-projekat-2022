@@ -6,6 +6,7 @@
 #include "../h/opcodes.hpp"
 #include "../h/_thread.hpp"
 #include "../h/_sem.hpp"
+#include "../h/_sleeplist.hpp"
 
 void Riscv::popSppSpie()
 {
@@ -125,6 +126,11 @@ void Riscv::handleSupervisorTrap()
             sem_t handle = (sem_t)args[1];
             w_retval(handle->signal());
         }
+        else if (opcode == TIME_SLEEP)
+        {
+            time_t timeout = (time_t)args[1];
+            w_retval(TCB::sleep(timeout));
+        }
 
         w_sstatus(sstatus);
         w_sepc(sepc);
@@ -133,6 +139,7 @@ void Riscv::handleSupervisorTrap()
     {
         // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
         TCB::timeSliceCounter++;
+        _sleeplist::tick(); // proverava da li je vreme da se neke niti probude, i ako jeste budi ih
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {
             uint64 sepc = r_sepc();
