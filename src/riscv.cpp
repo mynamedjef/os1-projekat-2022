@@ -75,7 +75,7 @@ void Riscv::handleSupervisorTrap()
         }
         else if (opcode == MEM_FREE)
         {
-            void *ptr = (void*)args[2];
+            void *ptr = (void*)args[1];
             w_retval((uint64)__mem_free(ptr));
         }
         else if (opcode == THREAD_DISPATCH)
