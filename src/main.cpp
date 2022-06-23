@@ -7,12 +7,14 @@
 #include "../h/riscv.hpp"
 #include "../h/userMain.hpp"
 #include "../h/_thread.hpp"
+#include "../h/_sleeplist.hpp"
 
 int main()
 {
     printString("main() started\n");
 
     TCB *kernel = TCB::kernelThread();
+    TCB *idle = TCB::idleThread();
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
@@ -24,8 +26,11 @@ int main()
         thread_dispatch();
     }
 
+    Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
+
     delete kernel;
     delete user;
+    delete idle;
     printString("main() finished\n");
 
     return 0;

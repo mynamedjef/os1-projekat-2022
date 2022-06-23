@@ -19,7 +19,8 @@ public:
         READY,
         CREATED,
         WAITING,
-        SLEEPING
+        SLEEPING,
+        IDLE
     };
 
     ~TCB() { delete[] stack; }
@@ -38,11 +39,15 @@ public:
     // pravi nit koja čeka da bude pokrenuta sa .start()
     static TCB *initThread(Body, void*, uint64*);
 
+    static TCB *idleThread();
+
     static TCB *kernelThread();
 
     static TCB *running;
 
     static TCB *kernel;
+
+    static TCB *idle;
 
     int start();
 
@@ -110,6 +115,8 @@ private:
     
     // budi nit
     int wake();
+
+    static void idleWrapper(void*);
 
     static uint64 timeSliceCounter;
 };

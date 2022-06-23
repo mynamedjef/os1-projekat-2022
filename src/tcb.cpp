@@ -11,7 +11,14 @@ TCB *TCB::running = nullptr;
 
 TCB *TCB::kernel = nullptr;
 
+TCB *TCB::idle = nullptr;
+
 uint64 TCB::timeSliceCounter = 0;
+
+void TCB::idleWrapper(void*)
+{
+    while (true) { }
+}
 
 TCB *TCB::createThread(Body body, void *arg, uint64 *stack)
 {
@@ -33,6 +40,15 @@ TCB *TCB::kernelThread()
         running = kernel = thr;
     }
     return kernel;
+}
+
+TCB *TCB::idleThread()
+{
+    if (!idle) {
+        uint64 *stack = (uint64*)__mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
+        idle = new TCB(idleWrapper, nullptr, stack);
+    }
+    return idle;
 }
 
 int TCB::start()
@@ -84,7 +100,11 @@ void TCB::dispatch()
     }
 
     running = Scheduler::get();
-    running->status = RUNNING;
+    if (running) {
+        running->status = RUNNING;
+    } else {
+        running = idle;
+    }
 
     TCB::contextSwitch(&old->context, &running->context);
 }
