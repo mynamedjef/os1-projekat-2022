@@ -98,6 +98,22 @@ void Riscv::handleSupervisorTrap()
 
             w_retval(0);
         }
+        else if (opcode == THREAD_PREPARE)
+        {
+            thread_t *handle = (thread_t*)args[1];
+            Body routine     = (Body)args[2];
+            void *arg        = (void*)args[3];
+            uint64 *stack    = (uint64*)args[4];
+
+            new _thread(handle, routine, arg, stack);
+
+            w_retval(0);
+        }
+        else if (opcode == THREAD_START)
+        {
+            thread_t handle = (thread_t)args[1];
+            w_retval(handle->start());
+        }
         else if (opcode == THREAD_EXIT)
         {
             int val = TCB::exit();
