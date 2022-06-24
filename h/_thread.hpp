@@ -33,6 +33,8 @@ private:
 
     friend class Riscv;
 
+    friend class Thread;
+
 };
 
 #endif //__thread_hpp
