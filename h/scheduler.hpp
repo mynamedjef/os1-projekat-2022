@@ -2,14 +2,14 @@
 #ifndef _scheduler_hpp
 #define _scheduler_hpp
 
-#include "list.hpp"
+#include "tcblist.hpp"
 
 class TCB;
 
 class Scheduler
 {
 private:
-    static List<TCB> readyThreadQueue;
+    static TCBList readyThreadQueue;
 
 public:
     static TCB *get();

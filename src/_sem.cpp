@@ -25,7 +25,7 @@ int _sem::close()
     closed = true;
     val = 0;
     while (waiting.size() > 0) {
-        TCB *tcb = waiting.removeFirst();
+        TCB *tcb = waiting.pop();
         tcb->release();
     }
     return 0;
@@ -38,7 +38,7 @@ int _sem::wait()
     }
 
     if (--val < 0) {
-        waiting.addLast(TCB::running);
+        waiting.insert(TCB::running);
         TCB::wait();
     }
     return (closed) ? -1 : 0;
@@ -51,7 +51,7 @@ int _sem::signal()
     }
 
     if (++val <= 0) {
-        TCB *tcb = waiting.removeFirst();
+        TCB *tcb = waiting.pop();
         tcb->release();
     }
     return 0;

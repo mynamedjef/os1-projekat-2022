@@ -1,16 +1,16 @@
 
 #include "../h/scheduler.hpp"
 
-List<TCB> Scheduler::readyThreadQueue;
+TCBList Scheduler::readyThreadQueue;
 
 TCB *Scheduler::get()
 {
-    return readyThreadQueue.removeFirst();
+    return readyThreadQueue.pop();
 }
 
-void Scheduler::put(TCB *ccb)
+void Scheduler::put(TCB *tcb)
 {
-    readyThreadQueue.addLast(ccb);
+    readyThreadQueue.insert(tcb);
 }
 
 int Scheduler::size()

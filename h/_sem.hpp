@@ -6,7 +6,7 @@
 #define __sem_hpp
 
 #include "syscall_c.h"
-#include "list.hpp"
+#include "tcblist.hpp"
 #include "tcb.hpp"
 
 class _sem {
@@ -18,7 +18,7 @@ public:
     void operator delete(void *ptr) { __mem_free(ptr); }
 
 private:
-    List<TCB> waiting;
+    TCBList waiting;
 
     int val;
 

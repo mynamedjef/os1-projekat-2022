@@ -6,6 +6,7 @@
 #define __sleeplist_hpp
 
 #include "tcb.hpp"
+#include "list.hpp"
 
 struct SleepNode {
     TCB *tcb;

@@ -6,6 +6,7 @@
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.h"
 #include "../h/_sleeplist.hpp"
+#include "../h/scheduler.hpp"
 
 TCB *TCB::running = nullptr;
 
