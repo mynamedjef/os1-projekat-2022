@@ -10,7 +10,7 @@
 
 void Riscv::popSppSpie()
 {
-    mc_sstatus(SSTATUS_SPP);
+//    mc_sstatus(SSTATUS_SPP);
     __asm__ volatile ("csrw sepc, ra");
     __asm__ volatile ("sret");
 }
@@ -24,6 +24,7 @@ enum Interrupts: uint64 {
 
 uint64 Riscv::restorePrivilege(uint64 sstatus)
 {
+    return sstatus;
     return (TCB::kernel == TCB::running) ?
         sstatus | SSTATUS_SPP :
         sstatus & ~(SSTATUS_SPP);
@@ -152,6 +153,14 @@ void Riscv::handleSupervisorTrap()
             int ret = TCB::sleep(timeout);
             sstatus = restorePrivilege(sstatus);
             w_retval(ret);
+        }
+        else if (opcode == GETC)
+        {
+            w_retval((char)__getc());
+        }
+        else if (opcode == PUTC)
+        {
+            __putc((char)args[1]);
         }
 
         w_sstatus(sstatus);
