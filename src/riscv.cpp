@@ -2,7 +2,7 @@
 #include "../h/riscv.hpp"
 #include "../h/tcb.hpp"
 #include "../lib/console.h"
-#include "../h/printing.hpp"
+#include "../test/printing.hpp"
 #include "../h/opcodes.hpp"
 #include "../h/_thread.hpp"
 #include "../h/_sem.hpp"
@@ -32,25 +32,25 @@ uint64 Riscv::restorePrivilege(uint64 sstatus)
 
 inline void Riscv::unexpectedTrap()
 {
-    uint64 scause = r_scause();
-    uint64 stval = r_stval();
-    uint64 stvec = r_stvec();
-    uint64 sepc = r_sepc();
+//    uint64 scause = r_scause();
+//    uint64 stval = r_stval();
+//    uint64 stvec = r_stvec();
+//    uint64 sepc = r_sepc();
 
     printString("scause: ");
-    printLong(scause);
+//    printLong(scause);
     printString("\n");
 
     printString("stval: ");
-    printLong(stval);
+//    printLong(stval);
     printString("\n");
 
     printString("stvec: ");
-    printLong(stvec);
+//    printLong(stvec);
     printString("\n");
 
     printString("sepc: ");
-    printLong(sepc);
+//    printLong(sepc);
     printString("\n");
 }
 
