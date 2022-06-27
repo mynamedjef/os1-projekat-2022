@@ -8,6 +8,7 @@
 #include "../h/userMain.hpp"
 #include "../h/_thread.hpp"
 #include "../h/_sleeplist.hpp"
+#include "../h/MemoryAllocator.hpp"
 
 void user_wrapper(void*)
 {
@@ -18,6 +19,8 @@ void user_wrapper(void*)
 
 int main()
 {
+    MemoryAllocator::init_memory();
+
     TCB *kernel = TCB::kernelThread();
     TCB *idle = TCB::idleThread();
 
