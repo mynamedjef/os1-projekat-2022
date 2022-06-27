@@ -11,17 +11,17 @@
 
 class MemoryAllocator {
 public:
-	static MemDescr *free, *occupied;
-	
-	static void *alloc(size_t);
-	static int mem_free(void*);
-	static void init_memory();
-	
-	// for debugging purposes
-	static void print_descr(MemDescr*);
-	static void prfree();
-	static void proccupied();
-	
+    static MemDescr *free, *occupied;
+
+    static uint64 allocd;
+
+    static uint64 deallocd;
+
+    static void *alloc(size_t);
+
+    static int mem_free(void*);
+
+    static void init_memory();
 };
 
 
