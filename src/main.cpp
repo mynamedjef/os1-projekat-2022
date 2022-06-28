@@ -9,6 +9,13 @@
 #include "../h/_thread.hpp"
 #include "../h/_sleeplist.hpp"
 #include "../h/MemoryAllocator.hpp"
+#include "../h/opcodes.hpp"
+
+void invoke(uint64 opcode)
+{
+    __asm__ volatile ("mv a0, %0" : : "r" (opcode));
+    __asm__ volatile ("ecall");
+}
 
 void user_wrapper(void*)
 {
@@ -29,12 +36,18 @@ int main()
 
     printString("main() started\n");
 
+    // prelazak u korisnički režim
+    invoke(USER_MODE);
+
     thread_t user;
     thread_create(&user, user_wrapper, nullptr);
 
     while (!user->isFinished()) {
         thread_dispatch();
     }
+
+    invoke(SUPER_MODE);
+    // povratak u administratorski režim
 
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
 

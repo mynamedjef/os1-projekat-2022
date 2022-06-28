@@ -10,7 +10,6 @@
 
 void Riscv::popSppSpie()
 {
-//    mc_sstatus(SSTATUS_SPP);
     __asm__ volatile ("csrw sepc, ra");
     __asm__ volatile ("sret");
 }
@@ -21,14 +20,6 @@ enum Interrupts: uint64 {
     ECALL_USER  = 0x0000000000000008UL,
     HARDWARE    = 0x8000000000000009UL
 };
-
-uint64 Riscv::restorePrivilege(uint64 sstatus)
-{
-    return sstatus;
-    return (TCB::kernel == TCB::running) ?
-        sstatus | SSTATUS_SPP :
-        sstatus & ~(SSTATUS_SPP);
-}
 
 inline void Riscv::unexpectedTrap()
 {
@@ -85,7 +76,6 @@ void Riscv::handleSupervisorTrap()
         {
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
-            sstatus = restorePrivilege(sstatus);
         }
         else if (opcode == THREAD_CREATE)
         {
@@ -118,7 +108,6 @@ void Riscv::handleSupervisorTrap()
         else if (opcode == THREAD_EXIT)
         {
             int val = TCB::exit();
-            sstatus = restorePrivilege(sstatus);
             w_retval(val);
         }
         else if (opcode == SEM_OPEN)
@@ -139,7 +128,6 @@ void Riscv::handleSupervisorTrap()
         {
             sem_t handle = (sem_t)args[1];
             int ret = handle->wait();
-            sstatus = restorePrivilege(sstatus);
             w_retval(ret);
         }
         else if (opcode == SEM_SIGNAL)
@@ -151,7 +139,6 @@ void Riscv::handleSupervisorTrap()
         {
             time_t timeout = (time_t)args[1];
             int ret = TCB::sleep(timeout);
-            sstatus = restorePrivilege(sstatus);
             w_retval(ret);
         }
         else if (opcode == GETC)
@@ -161,6 +148,14 @@ void Riscv::handleSupervisorTrap()
         else if (opcode == PUTC)
         {
             __putc((char)args[1]);
+        }
+        else if (opcode == USER_MODE)
+        {
+            sstatus &= ~(SSTATUS_SPP);
+        }
+        else if (opcode == SUPER_MODE)
+        {
+            sstatus |= SSTATUS_SPP;
         }
 
         w_sstatus(sstatus);
@@ -177,7 +172,6 @@ void Riscv::handleSupervisorTrap()
             uint64 sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
-            sstatus = restorePrivilege(sstatus);
             w_sstatus(sstatus);
             w_sepc(sepc);
         }

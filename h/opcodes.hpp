@@ -20,6 +20,8 @@ enum Opcodes: uint64 {
     TIME_SLEEP      = 0x31,
     GETC            = 0x41,
     PUTC            = 0x42,
+    USER_MODE       = 0x50,
+    SUPER_MODE      = 0x51
 };
 
 #endif //_opcodes_hpp
