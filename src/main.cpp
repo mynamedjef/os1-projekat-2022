@@ -17,11 +17,14 @@ void invoke(uint64 opcode)
     __asm__ volatile ("ecall");
 }
 
-void user_wrapper(void*)
+void user_wrapper(void *sem)
 {
+    invoke(USER_MODE);
     printString("userMain() started\n");
     userMain();
     printString("userMain() finished\n");
+    sem_signal((sem_t)sem);
+    invoke(SUPER_MODE);
 }
 
 int main()
@@ -36,18 +39,16 @@ int main()
 
     printString("main() started\n");
 
-    // prelazak u korisnički režim
-    invoke(USER_MODE);
+    // ------------- korisnički kod --------------
+    sem_t user_sem;
+    sem_open(&user_sem, 0);
 
     thread_t user;
-    thread_create(&user, user_wrapper, nullptr);
+    thread_create(&user, user_wrapper, user_sem);
 
-    while (!user->isFinished()) {
-        thread_dispatch();
-    }
-
-    invoke(SUPER_MODE);
-    // povratak u administratorski režim
+    sem_wait(user_sem);
+    sem_close(user_sem);
+    // ----------- kraj korisničkog koda ---------
 
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
 
