@@ -45,10 +45,9 @@ class PeriodicThread : public Thread {
 protected:
     PeriodicThread(time_t period);
     virtual void periodicActivation() {}
-    virtual void run() override;
 
-private:
-    time_t period;
+public:
+    static void wrapper(void*);
 };
 
 class Console {

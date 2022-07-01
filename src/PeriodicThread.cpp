@@ -4,13 +4,23 @@
 
 #include "../h/syscall_cpp.hpp"
 
-PeriodicThread::PeriodicThread(time_t period) : period(period) { }
-
-void PeriodicThread::run()
+struct period_struct
 {
-    while (true)
-    {
-        time_sleep(period);
-        periodicActivation();
+    PeriodicThread *pt;
+    time_t period;
+};
+
+void PeriodicThread::wrapper(void *arg)
+{
+    period_struct *p = (period_struct*)arg;
+    while (true) {
+        time_sleep(p->period);
+        p->pt->periodicActivation();
     }
+    delete p;
 }
+
+PeriodicThread::PeriodicThread(time_t period) :
+    Thread(PeriodicThread::wrapper, (void*)(new (period_struct){this, period}))
+{ }
+
