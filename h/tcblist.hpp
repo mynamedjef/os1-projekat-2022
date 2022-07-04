@@ -30,6 +30,8 @@ public:
     void insert(TCB *data);
 
     TCB *pop();
+
+    TCB *pop_priority(bool(*)(TCB*, TCB*));
 };
 
 #endif //_tcblist_hpp

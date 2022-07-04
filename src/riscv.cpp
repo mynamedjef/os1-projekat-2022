@@ -135,6 +135,11 @@ void Riscv::handleSupervisorTrap()
             sem_t handle = (sem_t)args[1];
             w_retval(handle->signal());
         }
+        else if (opcode == SEM_PRIO)
+        {
+            sem_t handle = (sem_t)args[1];
+            w_retval(handle->priority());
+        }
         else if (opcode == TIME_SLEEP)
         {
             time_t timeout = (time_t)args[1];

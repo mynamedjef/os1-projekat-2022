@@ -24,8 +24,6 @@ public:
 protected:
     Thread();
     virtual void run() {}
-
-private:
     thread_t myHandle;
 };
 
@@ -36,6 +34,7 @@ public:
 
     int wait();
     int signal();
+    int priority();
 
 private:
     sem_t myHandle;

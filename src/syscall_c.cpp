@@ -135,6 +135,14 @@ int sem_signal(sem_t handle)
     return (retval() == 0) ? 0 : -2;
 }
 
+int sem_prio(sem_t id)
+{
+    if (!id) { return -1; }
+    load_args();
+    invoke(SEM_PRIO);
+    return (retval() == 0) ? 0 : -2;
+}
+
 // ------------------ ostalo -------------------
 
 int time_sleep(time_t timeout)

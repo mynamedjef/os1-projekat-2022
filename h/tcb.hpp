@@ -49,32 +49,38 @@ public:
 
     static TCB *idle;
 
+    static unsigned stat_id;
+
     int start();
+
+    unsigned get_id() const { return id; }
 
     void *operator new(size_t size) { return __mem_alloc(size); }
 
     void operator delete(void *ptr) { __mem_free(ptr); }
 
 private:
-    TCB(Body body, void *arg, uint64 *stack) :
+    TCB(Body body, void *arg, uint64 *stack, bool user) :
             body(body),
             arg(arg),
             stack(stack),
-            context({(uint64) &threadWrapper,
-                     (uint64) &stack[DEFAULT_STACK_SIZE]
-                    }),
             timeSlice(DEFAULT_TIME_SLICE),
-            status(CREATED)
-    { }
-
-    TCB() :
-            body(nullptr),
-            arg(nullptr),
-            stack(nullptr),
-            context({0, 0}),
-            timeSlice(DEFAULT_TIME_SLICE),
-            status(RUNNING)
-    { }
+            id(stat_id++)
+    {
+        if (user)
+        {
+            context = {
+                    (uint64) &threadWrapper,
+                    (uint64) &stack[DEFAULT_STACK_SIZE]
+            };
+            status = CREATED;
+        }
+        else
+        {
+            context = {0, 0};
+            status = RUNNING;
+        }
+    }
 
     struct Context
     {
@@ -88,6 +94,7 @@ private:
     Context context;
     uint64 timeSlice;
     Status status;
+    unsigned id;
 
     friend class Riscv;
 

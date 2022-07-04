@@ -1,20 +1,47 @@
-//#include "../test/Threads_C_API_test.hpp" // zadatak 2, niti C API i sinhrona promena konteksta
-//#include "../test/Threads_CPP_API_test.hpp" // zadatak 2., niti CPP API i sinhrona promena konteksta
 
-//#include "../test/ConsumerProducer_C_API_test.h" // zadatak 3., kompletan C API sa semaforima, sinhrona promena konteksta
-//#include "../test/ConsumerProducer_CPP_Sync_API_test.hpp" // zadatak 3., kompletan CPP API sa semaforima, sinhrona promena konteksta
+#include "../h/syscall_cpp.hpp"
+#include "../test/printing.hpp"
+#include "../h/_thread.hpp"
 
-//#include "../test/ThreadSleep_C_API_test.hpp" // thread_sleep test C API
-#include "../test/ConsumerProducer_CPP_API_test.hpp" // zadatak 4. CPP API i asinhrona promena konteksta
+unsigned short rand() {
+    static unsigned short lfsr = 0xACE1u;
+    unsigned bit = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5) ) & 1;
+    return lfsr = (lfsr >> 1) | (bit << 15);
+}
+
+class Worker : public Thread {
+public:
+    Worker(sem_t s) : sem(s) {}
+protected:
+    void run() override
+    {
+        unsigned id = myHandle->id();
+        while (true) {
+            sem_wait(sem);
+            
+            printInt(id);
+            printString(" - ušao u kritičnu sekciju.\n");
+            // ------------------------------
+            unsigned sleep = rand() % 1000;
+            time_sleep(sleep);
+            // ------------------------------
+//            printInt(id);
+//            printString(" - izašao iz kritične sekcije.\n");
+            sem_prio(sem);
+        }
+    }
+    sem_t sem;
+};
 
 void userMain() {
-    //Threads_C_API_test(); // zadatak 2., niti C API i sinhrona promena konteksta
-    //Threads_CPP_API_test(); // zadatak 2., niti CPP API i sinhrona promena konteksta
-
-    //producerConsumer_C_API(); // zadatak 3., kompletan C API sa semaforima, sinhrona promena konteksta
-    //producerConsumer_CPP_Sync_API(); // zadatak 3., kompletan CPP API sa semaforima, sinhrona promena konteksta
-
-    //testSleeping(); // thread_sleep test C API
-    ConsumerProducerCPP::testConsumerProducer(); // zadatak 4. CPP API i asinhrona promena konteksta, kompletan test svega
+    sem_t s;
+    sem_open(&s, 5);
+    Thread *threads[50];
+    for (auto &thr : threads) {
+        thr = new Worker(s);
+        thr->start();
+    }
+    
+    while (true) { }
 
 }

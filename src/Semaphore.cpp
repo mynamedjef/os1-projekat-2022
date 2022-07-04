@@ -23,3 +23,8 @@ int Semaphore::signal()
 {
     return sem_signal(myHandle);
 }
+
+int Semaphore::priority()
+{
+    return sem_prio(myHandle);
+}

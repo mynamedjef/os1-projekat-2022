@@ -32,6 +32,8 @@ private:
 
     int signal();
 
+    int priority();
+
     friend class Riscv;
 
 };

@@ -3,6 +3,7 @@
 //
 
 #include "../h/_sem.hpp"
+#include "../test/printing.hpp"
 
 _sem::~_sem()
 {
@@ -36,6 +37,10 @@ int _sem::wait()
     if (closed) {
         return -1;
     }
+    printString("Wait(");
+    printInt(TCB::running->get_id());
+    printString(val > 0 ? ") [PROLAZI]" : ") [BLOKIRAN]");
+    printString("\n");
 
     if (--val < 0) {
         waiting.insert(TCB::running);
@@ -49,9 +54,33 @@ int _sem::signal()
     if (closed) {
         return -1;
     }
+    printString("Sign\t- ID pozivajuće niti: ");
+    printInt(TCB::running->get_id());
+    printString("\n");
 
     if (++val <= 0) {
         TCB *tcb = waiting.pop();
+        tcb->release();
+    }
+    return 0;
+}
+
+bool comp(TCB *t1, TCB *t2)
+{
+    return t1->get_id() < t2->get_id();
+}
+
+int _sem::priority()
+{
+    if (closed) {
+        return -1;
+    }
+    printString("Prio(");
+    printInt(TCB::running->get_id());
+    printString(")\n");
+    
+    if (++val <= 0) {
+        TCB *tcb = waiting.pop_priority(comp);
         tcb->release();
     }
     return 0;

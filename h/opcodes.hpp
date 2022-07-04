@@ -17,6 +17,7 @@ enum Opcodes: uint64 {
     SEM_CLOSE       = 0x22,
     SEM_WAIT        = 0x23,
     SEM_SIGNAL      = 0x24,
+    SEM_PRIO        = 0x25,
     TIME_SLEEP      = 0x31,
     GETC            = 0x41,
     PUTC            = 0x42,
