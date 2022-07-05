@@ -46,7 +46,7 @@ TCB *TCB::idleThread()
 {
     if (!idle) {
         uint64 *stack = (uint64*)__mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
-        idle = new TCB(idleWrapper, nullptr, stack);
+        idle = initThread(idleWrapper, nullptr, stack);
         idle->status = IDLE;
     }
     return idle;

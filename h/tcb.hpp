@@ -56,25 +56,26 @@ public:
     void operator delete(void *ptr) { __mem_free(ptr); }
 
 private:
-    TCB(Body body, void *arg, uint64 *stack) :
+    TCB(Body body, void *arg, uint64 *stack, bool main=false) :
             body(body),
             arg(arg),
             stack(stack),
-            context({(uint64) &threadWrapper,
-                     (uint64) &stack[DEFAULT_STACK_SIZE]
-                    }),
-            timeSlice(DEFAULT_TIME_SLICE),
-            status(CREATED)
-    { }
+            timeSlice(DEFAULT_TIME_SLICE)
+    {
+        if (!main)
+        {
+            context = {(uint64) &threadWrapper,
+                       (uint64) &stack[DEFAULT_STACK_SIZE]};
+            status = CREATED;
+        }
+        else
+        {
+            context = {0, 0};
+            status = RUNNING;
+        }
+    }
 
-    TCB() :
-            body(nullptr),
-            arg(nullptr),
-            stack(nullptr),
-            context({0, 0}),
-            timeSlice(DEFAULT_TIME_SLICE),
-            status(RUNNING)
-    { }
+    TCB() : TCB(nullptr, nullptr, nullptr, true) { }
 
     struct Context
     {
