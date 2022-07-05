@@ -23,8 +23,7 @@ void TCB::idleWrapper(void*)
 TCB *TCB::createThread(Body body, void *arg, uint64 *stack)
 {
     TCB *thr = initThread(body, arg, stack);
-    thr->status = READY;
-    Scheduler::put(thr);
+    thr->ready();
     return thr;
 }
 
@@ -57,8 +56,7 @@ int TCB::start()
     if (status != CREATED) {
         return -1;
     }
-    status = READY;
-    Scheduler::put(this);
+    ready();
     return 0;
 }
 
@@ -87,8 +85,7 @@ int TCB::release()
     if (status != WAITING) {
         return -1;
     }
-    status = READY;
-    Scheduler::put(this);
+    ready();
     return 0;
 }
 
@@ -96,8 +93,7 @@ void TCB::dispatch()
 {
     TCB *old = running;
     if (old->status == RUNNING) {
-        old->status = READY;
-        Scheduler::put(old);
+        old->ready();
     }
 
     running = Scheduler::get();
@@ -134,7 +130,12 @@ int TCB::wake()
     if (status != SLEEPING) {
         return -1;
     }
+    ready();
+    return 0;
+}
+
+void TCB::ready()
+{
     status = READY;
     Scheduler::put(this);
-    return 0;
 }
