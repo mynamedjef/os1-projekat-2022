@@ -119,6 +119,9 @@ private:
     // budi nit
     int wake();
 
+    // ubacuje nit u scheduler tj. sprema je za rad
+    void ready();
+
     static void idleWrapper(void*);
 
     static uint64 timeSliceCounter;
