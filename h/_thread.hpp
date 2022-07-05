@@ -31,7 +31,7 @@ private:
         *handle = this;
     }
 
-    friend class Riscv;
+    friend class Kernel;
 
     friend class Thread;
 

@@ -10,6 +10,7 @@
 #include "../h/_sleeplist.hpp"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/opcodes.hpp"
+#include "../h/_kernel.hpp"
 
 void invoke(uint64 opcode)
 {
@@ -30,6 +31,7 @@ void user_wrapper(void *sem)
 int main()
 {
     MemoryAllocator::init_memory();
+    Kernel::init();
 
     TCB *kernel = TCB::kernelThread();
     TCB *idle = TCB::idleThread();

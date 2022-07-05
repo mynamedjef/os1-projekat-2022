@@ -4,9 +4,9 @@
 #include "../lib/console.h"
 #include "../test/printing.hpp"
 #include "../h/opcodes.hpp"
-#include "../h/_thread.hpp"
 #include "../h/_sem.hpp"
 #include "../h/_sleeplist.hpp"
+#include "../h/_kernel.hpp"
 
 void Riscv::popSppSpie()
 {
@@ -60,104 +60,11 @@ void Riscv::handleSupervisorTrap()
         uint64 sepc = r_sepc() + 4;
         uint64 sstatus = r_sstatus();
 
-        uint64 opcode = args[0];
-        if (opcode == MEM_ALLOC)
-        {
-            size_t volatile size = args[1] * MEM_BLOCK_SIZE;
-            void *ret = __mem_alloc(size);
-            w_retval((uint64)ret);
-        }
-        else if (opcode == MEM_FREE)
-        {
-            void *ptr = (void*)args[1];
-            w_retval((uint64)__mem_free(ptr));
-        }
-        else if (opcode == THREAD_DISPATCH)
-        {
-            TCB::timeSliceCounter = 0;
-            TCB::dispatch();
-        }
-        else if (opcode == THREAD_CREATE)
-        {
-            thread_t *handle = (thread_t*)args[1];
-            Body routine     = (Body)args[2];
-            void *arg        = (void*)args[3];
-            uint64 *stack    = (uint64*)args[4];
+        uint64 ret = Kernel::exec(args);
+        if (args[0] == USER_MODE)  { sstatus &= ~(SSTATUS_SPP); }
+        if (args[0] == SUPER_MODE) { sstatus |= SSTATUS_SPP; }
 
-            _thread *t = new _thread(handle, routine, arg, stack);
-            t->start();
-
-            w_retval(0);
-        }
-        else if (opcode == THREAD_PREPARE)
-        {
-            thread_t *handle = (thread_t*)args[1];
-            Body routine     = (Body)args[2];
-            void *arg        = (void*)args[3];
-            uint64 *stack    = (uint64*)args[4];
-
-            new _thread(handle, routine, arg, stack);
-
-            w_retval(0);
-        }
-        else if (opcode == THREAD_START)
-        {
-            thread_t handle = (thread_t)args[1];
-            w_retval(handle->start());
-        }
-        else if (opcode == THREAD_EXIT)
-        {
-            int val = TCB::exit();
-            w_retval(val);
-        }
-        else if (opcode == SEM_OPEN)
-        {
-            sem_t *handle = (sem_t*)args[1];
-            unsigned init = (unsigned)args[2];
-
-            new _sem(handle, init);
-
-            w_retval(0);
-        }
-        else if (opcode == SEM_CLOSE)
-        {
-            sem_t handle = (sem_t)args[1];
-            w_retval(handle->close());
-        }
-        else if (opcode == SEM_WAIT)
-        {
-            sem_t handle = (sem_t)args[1];
-            int ret = handle->wait();
-            w_retval(ret);
-        }
-        else if (opcode == SEM_SIGNAL)
-        {
-            sem_t handle = (sem_t)args[1];
-            w_retval(handle->signal());
-        }
-        else if (opcode == TIME_SLEEP)
-        {
-            time_t timeout = (time_t)args[1];
-            int ret = TCB::sleep(timeout);
-            w_retval(ret);
-        }
-        else if (opcode == GETC)
-        {
-            w_retval((char)__getc());
-        }
-        else if (opcode == PUTC)
-        {
-            __putc((char)args[1]);
-        }
-        else if (opcode == USER_MODE)
-        {
-            sstatus &= ~(SSTATUS_SPP);
-        }
-        else if (opcode == SUPER_MODE)
-        {
-            sstatus |= SSTATUS_SPP;
-        }
-
+        w_retval(ret);
         w_sstatus(sstatus);
         w_sepc(sepc);
     }
@@ -170,8 +77,10 @@ void Riscv::handleSupervisorTrap()
         {
             uint64 sepc = r_sepc();
             uint64 sstatus = r_sstatus();
-            TCB::timeSliceCounter = 0;
-            TCB::dispatch();
+
+            uint64 arg = THREAD_DISPATCH;
+            Kernel::exec(&arg);
+
             w_sstatus(sstatus);
             w_sepc(sepc);
         }

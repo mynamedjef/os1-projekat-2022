@@ -32,7 +32,7 @@ private:
 
     int signal();
 
-    friend class Riscv;
+    friend class Kernel;
 
 };
 

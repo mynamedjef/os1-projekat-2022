@@ -89,6 +89,8 @@ private:
     uint64 timeSlice;
     Status status;
 
+    friend class Kernel;
+
     friend class Riscv;
 
     friend class _sem;
