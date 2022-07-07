@@ -79,7 +79,7 @@ public:
     // supervisor trap
     static void supervisorTrap();
 
-    static uint64 restorePrivilege(uint64);
+    static void restorePrivilege();
 
 private:
 

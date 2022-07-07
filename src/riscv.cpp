@@ -22,11 +22,13 @@ enum Interrupts: uint64 {
     HARDWARE    = 0x8000000000000009UL
 };
 
-uint64 Riscv::restorePrivilege(uint64 sstatus)
+void Riscv::restorePrivilege()
 {
-    return (TCB::kernel == TCB::running) ?
-        sstatus | SSTATUS_SPP :
-        sstatus & ~(SSTATUS_SPP);
+    if (TCB::running->is_systhread()) {
+        ms_sstatus(SSTATUS_SPP);
+    } else {
+        mc_sstatus(SSTATUS_SPP);
+    }
 }
 
 inline void Riscv::unexpectedTrap()
@@ -66,7 +68,6 @@ void Riscv::handleSupervisorTrap()
     {
         // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
         uint64 sepc = r_sepc() + 4;
-        uint64 sstatus = r_sstatus();
 
         uint64 opcode = args[0];
         if (opcode == MEM_ALLOC)
@@ -84,7 +85,6 @@ void Riscv::handleSupervisorTrap()
         {
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
-            sstatus = restorePrivilege(sstatus);
         }
         else if (opcode == THREAD_CREATE)
         {
@@ -117,7 +117,6 @@ void Riscv::handleSupervisorTrap()
         else if (opcode == THREAD_EXIT)
         {
             int val = TCB::exit();
-            sstatus = restorePrivilege(sstatus);
             w_retval(val);
         }
         else if (opcode == SEM_OPEN)
@@ -138,7 +137,6 @@ void Riscv::handleSupervisorTrap()
         {
             sem_t handle = (sem_t)args[1];
             int ret = handle->wait();
-            sstatus = restorePrivilege(sstatus);
             w_retval(ret);
         }
         else if (opcode == SEM_SIGNAL)
@@ -150,11 +148,9 @@ void Riscv::handleSupervisorTrap()
         {
             time_t timeout = (time_t)args[1];
             int ret = TCB::sleep(timeout);
-            sstatus = restorePrivilege(sstatus);
             w_retval(ret);
         }
 
-        w_sstatus(sstatus);
         w_sepc(sepc);
     }
     else if (scause == SOFTWARE)
@@ -165,11 +161,8 @@ void Riscv::handleSupervisorTrap()
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {
             uint64 sepc = r_sepc();
-            uint64 sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
-            sstatus = restorePrivilege(sstatus);
-            w_sstatus(sstatus);
             w_sepc(sepc);
         }
         mc_sip(SIP_SSIP);

@@ -37,6 +37,7 @@ TCB *TCB::kernelThread()
     if (!kernel) {
         TCB *thr = new TCB();
         running = kernel = thr;
+        kernel->sys_thread = true;
     }
     return kernel;
 }
@@ -47,6 +48,7 @@ TCB *TCB::idleThread()
         uint64 *stack = (uint64*)__mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
         idle = initThread(idleWrapper, nullptr, stack);
         idle->status = IDLE;
+        idle->sys_thread = true;
     }
     return idle;
 }
@@ -103,6 +105,7 @@ void TCB::dispatch()
         running = idle;
     }
 
+    Riscv::restorePrivilege();
     TCB::contextSwitch(&old->context, &running->context);
 }
 

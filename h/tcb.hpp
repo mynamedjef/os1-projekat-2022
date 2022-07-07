@@ -27,6 +27,8 @@ public:
 
     bool isFinished() const { return status == FINISHED; }
 
+    bool is_systhread() const { return sys_thread; }
+
     void setStatus(Status st) { status = st; }
 
     uint64 getTimeSlice() const { return timeSlice; }
@@ -60,7 +62,8 @@ private:
             body(body),
             arg(arg),
             stack(stack),
-            timeSlice(DEFAULT_TIME_SLICE)
+            timeSlice(DEFAULT_TIME_SLICE),
+            sys_thread(false)
     {
         if (!main)
         {
@@ -89,6 +92,7 @@ private:
     Context context;
     uint64 timeSlice;
     Status status;
+    bool sys_thread;
 
     friend class Riscv;
 
