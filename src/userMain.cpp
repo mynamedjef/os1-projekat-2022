@@ -9,10 +9,6 @@
 
 void userMain(void* arg)
 {
-    printString("userMain() started, with arg: ");
-    printLong((uint64)arg);
-    printString("\n");
-    
     thread_t threads[4];
     
     thread_create(&threads[0], workerBodyA, nullptr);
@@ -36,5 +32,4 @@ void userMain(void* arg)
     {
         delete thread;
     }
-    printString("userMain() finished\n");
 }

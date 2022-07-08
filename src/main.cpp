@@ -10,6 +10,14 @@
 #include "../h/_sleeplist.hpp"
 #include "../h/MemoryAllocator.hpp"
 
+void user_wrapper(void *sem)
+{
+    printString("userMain() started\n");
+    userMain(nullptr);
+    printString("userMain() finished\n");
+    sem_signal((sem_t)sem);
+}
+
 int main()
 {
     MemoryAllocator::init_memory();
@@ -24,20 +32,24 @@ int main()
 
     printString("main() started\n");
 
+    // paljenje korisnika
+    sem_t user_sem;
+    sem_open(&user_sem, 0);
+
     thread_t user;
-    thread_create(&user, userMain, (void*)1337);
+    thread_create(&user, user_wrapper, user_sem);
 
-    while (!user->isFinished()) {
-        thread_dispatch();
-    }
+    // čekanje korisnika
+    sem_wait(user_sem);
 
+    printString("main() cleaning up\n");
+    while (Riscv::bufout->count() > 0) { thread_dispatch(); } // čekanje da se ispiše sve iz bafera ako već nije
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
 
     delete kernel;
     delete user;
     delete idle;
     delete output;
-    printString("main() finished\n");
 
     return 0;
 }
