@@ -34,6 +34,7 @@ private:
 
     friend class Riscv;
 
+    friend class _buffer;
 };
 
 #endif //__sem_hpp
