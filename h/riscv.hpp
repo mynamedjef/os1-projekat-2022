@@ -97,6 +97,8 @@ private:
 
     static void loadParams(uint64*);
 
+    static uint64 syscall(uint64*);
+
 };
 
 inline uint64 Riscv::r_scause()

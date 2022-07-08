@@ -67,6 +67,84 @@ inline void Riscv::unexpectedTrap()
 
 using Body = void(*)(void*);
 
+uint64 Riscv::syscall(uint64 *args)
+{
+    uint64 opcode = args[0];
+    uint64 retval = 0;
+    if (opcode == MEM_ALLOC)
+    {
+        size_t volatile size = args[1] * MEM_BLOCK_SIZE;
+        retval = (uint64)__mem_alloc(size);
+    }
+    else if (opcode == MEM_FREE)
+    {
+        void *ptr = (void*)args[1];
+        retval = (uint64)__mem_free(ptr);
+    }
+    else if (opcode == THREAD_DISPATCH)
+    {
+        TCB::timeSliceCounter = 0;
+        TCB::dispatch();
+    }
+    else if (opcode == THREAD_CREATE || opcode == THREAD_PREPARE)
+    {
+        thread_t *handle = (thread_t*)args[1];
+        Body routine     = (Body)args[2];
+        void *arg        = (void*)args[3];
+        uint64 *stack    = (uint64*)args[4];
+
+        _thread *t = new _thread(handle, routine, arg, stack);
+        if (opcode == THREAD_CREATE) { retval = t->start(); }
+    }
+    else if (opcode == THREAD_START)
+    {
+        thread_t handle = (thread_t)args[1];
+        retval = handle->start();
+    }
+    else if (opcode == THREAD_EXIT)
+    {
+        int val = TCB::exit();
+        retval = val;
+    }
+    else if (opcode == SEM_OPEN)
+    {
+        sem_t *handle = (sem_t*)args[1];
+        unsigned init = (unsigned)args[2];
+
+        new _sem(handle, init);
+    }
+    else if (opcode == SEM_CLOSE)
+    {
+        sem_t handle = (sem_t)args[1];
+        retval = handle->close();
+    }
+    else if (opcode == SEM_WAIT)
+    {
+        sem_t handle = (sem_t)args[1];
+        retval = handle->wait();
+    }
+    else if (opcode == SEM_SIGNAL)
+    {
+        sem_t handle = (sem_t)args[1];
+        retval = handle->signal();
+    }
+    else if (opcode == TIME_SLEEP)
+    {
+        time_t timeout = (time_t)args[1];
+        retval = TCB::sleep(timeout);
+    }
+    else if (opcode == GETC)
+    {
+        char c = bufin->kernel_get();
+        retval = ((uint64)c);
+    }
+    else if (opcode == PUTC)
+    {
+        bufout->kernel_put((char)args[1]);
+    }
+    return retval;
+}
+
 void Riscv::handleSupervisorTrap()
 {
     // argumenti se ovde učitavaju jer if-ovi pregaze neke registre (npr. a3,a4)
@@ -79,97 +157,7 @@ void Riscv::handleSupervisorTrap()
         // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
         uint64 sepc = r_sepc() + 4;
 
-        uint64 opcode = args[0];
-        if (opcode == MEM_ALLOC)
-        {
-            size_t volatile size = args[1] * MEM_BLOCK_SIZE;
-            void *ret = __mem_alloc(size);
-            w_retval((uint64)ret);
-        }
-        else if (opcode == MEM_FREE)
-        {
-            void *ptr = (void*)args[1];
-            w_retval((uint64)__mem_free(ptr));
-        }
-        else if (opcode == THREAD_DISPATCH)
-        {
-            TCB::timeSliceCounter = 0;
-            TCB::dispatch();
-        }
-        else if (opcode == THREAD_CREATE)
-        {
-            thread_t *handle = (thread_t*)args[1];
-            Body routine     = (Body)args[2];
-            void *arg        = (void*)args[3];
-            uint64 *stack    = (uint64*)args[4];
-
-            _thread *t = new _thread(handle, routine, arg, stack);
-            t->start();
-
-            w_retval(0);
-        }
-        else if (opcode == THREAD_PREPARE)
-        {
-            thread_t *handle = (thread_t*)args[1];
-            Body routine     = (Body)args[2];
-            void *arg        = (void*)args[3];
-            uint64 *stack    = (uint64*)args[4];
-
-            new _thread(handle, routine, arg, stack);
-
-            w_retval(0);
-        }
-        else if (opcode == THREAD_START)
-        {
-            thread_t handle = (thread_t)args[1];
-            w_retval(handle->start());
-        }
-        else if (opcode == THREAD_EXIT)
-        {
-            int val = TCB::exit();
-            w_retval(val);
-        }
-        else if (opcode == SEM_OPEN)
-        {
-            sem_t *handle = (sem_t*)args[1];
-            unsigned init = (unsigned)args[2];
-
-            new _sem(handle, init);
-
-            w_retval(0);
-        }
-        else if (opcode == SEM_CLOSE)
-        {
-            sem_t handle = (sem_t)args[1];
-            w_retval(handle->close());
-        }
-        else if (opcode == SEM_WAIT)
-        {
-            sem_t handle = (sem_t)args[1];
-            int ret = handle->wait();
-            w_retval(ret);
-        }
-        else if (opcode == SEM_SIGNAL)
-        {
-            sem_t handle = (sem_t)args[1];
-            w_retval(handle->signal());
-        }
-        else if (opcode == TIME_SLEEP)
-        {
-            time_t timeout = (time_t)args[1];
-            int ret = TCB::sleep(timeout);
-            w_retval(ret);
-        }
-        else if (opcode == GETC)
-        {
-            char c = bufin->kernel_get();
-            w_retval((uint64)c);
-        }
-        else if (opcode == PUTC)
-        {
-            bufout->kernel_put((char)args[1]);
-        }
-
+        w_retval(syscall(args));
         w_sepc(sepc);
     }
     else if (scause == SOFTWARE)
