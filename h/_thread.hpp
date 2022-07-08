@@ -20,7 +20,17 @@ public:
 
     void operator delete(void *ptr) { __mem_free(ptr); }
 
+    static void cleanup()
+    {
+        while (all_threads.size() > 0) {
+            _thread *temp = all_threads.removeFirst();
+            delete temp;
+        }
+    }
+
 private:
+    static List<_thread> all_threads;
+
     TCB *parent;
 
     int start() { return parent->start(); }
@@ -29,6 +39,7 @@ private:
     {
         parent = TCB::initThread(start_routine, arg, stack_space);
         *handle = this;
+        all_threads.addLast(this);
     }
 
     friend class Riscv;

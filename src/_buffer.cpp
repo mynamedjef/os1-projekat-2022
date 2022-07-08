@@ -12,14 +12,6 @@ _buffer::_buffer(int capacity) : head(0), tail(0), cap(capacity), size(0)
     new _sem(&available, 0);
 }
 
-_buffer::~_buffer()
-{
-    delete mutex_put;
-    delete mutex_get;
-    delete free;
-    delete available;
-}
-
 // get() koji se koristi samo tokom prekidne rutine (kernel kod)
 char _buffer::kernel_get()
 {

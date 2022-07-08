@@ -108,6 +108,34 @@ public:
         if (!tail) { return 0; }
         return tail->data;
     }
+
+    T *removeElement(Elem *elem)
+    {
+        if (elem == nullptr) {
+            return nullptr;
+        }
+        else if (elem == head) {
+            return removeFirst();
+        }
+        else if (elem == tail) {
+            return removeLast();
+        }
+        else {
+            for (Elem *curr = head; curr; curr = curr->next) {
+                if (curr->next == elem) {
+                    Elem *temp = curr->next;
+                    T *x = temp->data;
+                    curr->next = curr->next->next;
+                    count--;
+                    delete temp;
+                    return x;
+                }
+            }
+        }
+        return nullptr;
+    }
+ 
+    friend class TCB;
 };
 
 #endif //_list_hpp

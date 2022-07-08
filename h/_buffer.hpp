@@ -29,8 +29,6 @@ public:
 
     _buffer() : _buffer(BUFFER_SIZE) { }
 
-    ~_buffer();
-
     // get() koji se koristi samo tokom prekidne rutine (kernel kod)
     char kernel_get();
 

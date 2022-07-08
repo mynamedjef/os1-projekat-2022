@@ -55,6 +55,10 @@ public:
 
     static TCB *output;
 
+    static List<TCB> all_tcbs;
+
+    static void cleanup();
+
     int start();
 
     void *operator new(size_t size) { return __mem_alloc(size); }
@@ -80,6 +84,7 @@ private:
             context = {0, 0};
             status = RUNNING;
         }
+        all_tcbs.addLast(this);
     }
 
     TCB() : TCB(nullptr, nullptr, nullptr, true) { }

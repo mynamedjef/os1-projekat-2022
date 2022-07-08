@@ -4,6 +4,8 @@
 
 #include "../h/_sem.hpp"
 
+List<_sem> _sem::all_sems;
+
 _sem::~_sem()
 {
     close();
@@ -14,6 +16,7 @@ _sem::_sem(sem_t *handle, unsigned init)
     *handle = this;
     val = init;
     closed = false;
+    all_sems.addLast(this);
 }
 
 int _sem::close()
@@ -56,3 +59,12 @@ int _sem::signal()
     }
     return 0;
 }
+
+void _sem::cleanup()
+{
+    while (all_sems.size() > 0) {
+        _sem *temp = all_sems.removeFirst();
+        if (temp) delete temp;
+    }
+}
+

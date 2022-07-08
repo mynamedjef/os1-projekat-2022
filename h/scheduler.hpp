@@ -18,6 +18,8 @@ public:
 
     static int size();
 
+    static void cleanup();
+
 };
 
 #endif //_scheduler_hpp

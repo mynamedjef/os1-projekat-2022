@@ -23,9 +23,9 @@ int main()
     MemoryAllocator::init_memory();
     Riscv::init();
 
-    TCB *kernel = TCB::kernelThread();
-    TCB *idle = TCB::idleThread();
-    TCB *output = TCB::outputThread();
+    TCB::kernelThread();
+    TCB::idleThread();
+    TCB::outputThread();
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
@@ -46,10 +46,13 @@ int main()
     while (Riscv::bufout->count() > 0) { thread_dispatch(); } // čekanje da se ispiše sve iz bafera ako već nije
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
 
-    delete kernel;
-    delete user;
-    delete idle;
-    delete output;
+    Riscv::cleanup();
+    Scheduler::cleanup();
+    _sem::cleanup();
+    _thread::cleanup();
+    TCB::cleanup();
+//    printInt(MemoryAllocator::allocd - MemoryAllocator::deallocd);
+    putc('\n');
 
     return 0;
 }

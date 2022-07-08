@@ -17,3 +17,10 @@ int Scheduler::size()
 {
     return readyThreadQueue.size();
 }
+
+void Scheduler::cleanup()
+{
+    while (readyThreadQueue.size()) {
+        readyThreadQueue.removeFirst();
+    }
+}

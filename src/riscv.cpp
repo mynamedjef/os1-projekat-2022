@@ -83,7 +83,6 @@ uint64 Riscv::syscall(uint64 *args)
     }
     else if (opcode == THREAD_DISPATCH)
     {
-        TCB::timeSliceCounter = 0;
         TCB::dispatch();
     }
     else if (opcode == THREAD_CREATE || opcode == THREAD_PREPARE)
@@ -168,7 +167,6 @@ void Riscv::handleSupervisorTrap()
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {
             uint64 sepc = r_sepc();
-            TCB::timeSliceCounter = 0;
             TCB::dispatch();
             w_sepc(sepc);
         }
@@ -195,4 +193,10 @@ void Riscv::handleSupervisorTrap()
         // unexpected trap cause
         unexpectedTrap();
     }
+}
+
+void Riscv::cleanup()
+{
+    delete bufin;
+    delete bufout;
 }

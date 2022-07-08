@@ -7,6 +7,8 @@
 #include "../h/syscall_c.h"
 #include "../h/_sleeplist.hpp"
 
+List<TCB> TCB::all_tcbs;
+
 TCB *TCB::running = nullptr;
 
 TCB *TCB::kernel = nullptr;
@@ -117,13 +119,14 @@ int TCB::release()
 
 void TCB::dispatch()
 {
+    TCB::timeSliceCounter = 0;
     TCB *old = running;
     if (old->status == RUNNING) {
         old->ready();
     }
 
     running = Scheduler::get();
-    if (running) {
+    if (running && running->status == READY) {
         running->status = RUNNING;
     } else {
         running = idle;
@@ -165,4 +168,11 @@ void TCB::ready()
 {
     status = READY;
     Scheduler::put(this);
+}
+
+void TCB::cleanup()
+{
+    delete idle;
+    delete output;
+    delete kernel;
 }

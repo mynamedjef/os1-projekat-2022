@@ -17,8 +17,12 @@ public:
 
     void operator delete(void *ptr) { __mem_free(ptr); }
 
+    static void cleanup();
+
 private:
     List<TCB> waiting;
+
+    static List<_sem> all_sems;
 
     int val;
 
