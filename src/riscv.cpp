@@ -8,6 +8,16 @@
 #include "../h/_sem.hpp"
 #include "../h/_sleeplist.hpp"
 
+_buffer *Riscv::bufin = nullptr;
+
+_buffer *Riscv::bufout = nullptr;
+
+void Riscv::init()
+{
+    bufin = new _buffer;
+    bufout = new _buffer;
+}
+
 void Riscv::popSppSpie()
 {
     mc_sstatus(SSTATUS_SPP);
@@ -150,6 +160,15 @@ void Riscv::handleSupervisorTrap()
             int ret = TCB::sleep(timeout);
             w_retval(ret);
         }
+        else if (opcode == GETC)
+        {
+            char c = bufin->kernel_get();
+            w_retval((uint64)c);
+        }
+        else if (opcode == PUTC)
+        {
+            bufout->kernel_put((char)args[1]);
+        }
 
         w_sepc(sepc);
     }
@@ -170,7 +189,18 @@ void Riscv::handleSupervisorTrap()
     else if (scause == HARDWARE)
     {
         // interrupt: yes; cause code: supervisor external interrupt (PLIC; could be keyboard)
-        console_handler();
+        static int IRQ_CONSOLE = 10;
+        int irq = plic_claim();
+        if (irq == IRQ_CONSOLE)
+        {
+            volatile char status = *((char*)CONSOLE_STATUS);
+            while (status & CONSOLE_RX_STATUS_BIT){
+                char c = (*(char*)CONSOLE_RX_DATA);
+                bufin->kernel_put(c);
+                status = *((char*)CONSOLE_STATUS);
+            }
+        }
+        plic_complete(irq);
     }
     else
     {

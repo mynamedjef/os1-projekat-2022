@@ -13,11 +13,25 @@ TCB *TCB::kernel = nullptr;
 
 TCB *TCB::idle = nullptr;
 
+TCB *TCB::output = nullptr;
+
 uint64 TCB::timeSliceCounter = 0;
+
+void console_out(void*)
+{
+    while (true) {
+        volatile char status = *((char *) CONSOLE_STATUS);
+        while ((status & CONSOLE_TX_STATUS_BIT)) {
+            char c = Riscv::bufout->get();
+            *((char*)CONSOLE_TX_DATA) = c;
+            status = *((char*) CONSOLE_STATUS);
+        }
+    }
+}
 
 void TCB::idleWrapper(void*)
 {
-    while (true) { }
+    while (true) { thread_dispatch(); }
 }
 
 TCB *TCB::createThread(Body body, void *arg, uint64 *stack)
@@ -51,6 +65,16 @@ TCB *TCB::idleThread()
         idle->sys_thread = true;
     }
     return idle;
+}
+
+TCB *TCB::outputThread()
+{
+    if (!output) {
+        uint64 *stack = (uint64*)__mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
+        output = createThread(console_out, nullptr, stack);
+        output->sys_thread = true;
+    }
+    return output;
 }
 
 int TCB::start()

@@ -6,6 +6,7 @@
 #define OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_RISCV_HPP
 
 #include "../lib/hw.h"
+#include "../h/_buffer.hpp"
 
 class Riscv
 {
@@ -80,6 +81,10 @@ public:
     static void supervisorTrap();
 
     static void restorePrivilege();
+
+    static _buffer *bufin, *bufout;
+
+    static void init();
 
 private:
 

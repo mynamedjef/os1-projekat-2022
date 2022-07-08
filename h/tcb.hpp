@@ -45,11 +45,15 @@ public:
 
     static TCB *kernelThread();
 
+    static TCB *outputThread();
+
     static TCB *running;
 
     static TCB *kernel;
 
     static TCB *idle;
+
+    static TCB *output;
 
     int start();
 
