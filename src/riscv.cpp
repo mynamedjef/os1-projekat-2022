@@ -2,7 +2,7 @@
 #include "../h/riscv.hpp"
 #include "../h/tcb.hpp"
 #include "../lib/console.h"
-#include "../h/printing.hpp"
+#include "../test/printing.hpp"
 #include "../h/opcodes.hpp"
 #include "../h/_thread.hpp"
 #include "../h/_sem.hpp"
@@ -49,19 +49,19 @@ inline void Riscv::unexpectedTrap()
     uint64 sepc = r_sepc();
 
     printString("scause: ");
-    printLong(scause);
+    printInt(scause);
     printString("\n");
 
     printString("stval: ");
-    printLong(stval);
+    printInt(stval);
     printString("\n");
 
     printString("stvec: ");
-    printLong(stvec);
+    printInt(stvec);
     printString("\n");
 
     printString("sepc: ");
-    printLong(sepc);
+    printInt(sepc);
     printString("\n");
 }
 

@@ -3,7 +3,7 @@
 //
 
 #include "../h/tcb.hpp"
-#include "../h/printing.hpp"
+#include "../test/printing.hpp"
 #include "../h/riscv.hpp"
 #include "../h/userMain.hpp"
 #include "../h/_thread.hpp"
@@ -13,7 +13,7 @@
 void user_wrapper(void *sem)
 {
     printString("userMain() started\n");
-    userMain(nullptr);
+    userMain();
     printString("userMain() finished\n");
     sem_signal((sem_t)sem);
 }

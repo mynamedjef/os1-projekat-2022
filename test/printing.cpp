@@ -1,10 +1,8 @@
 //
-// Created by djafere on 5/18/22.
+// Created by os on 5/18/22.
 //
 
-#include "../h/printing.hpp"
-#include "../h/syscall_c.h"
-#include "../lib/console.h"
+#include "printing.hpp"
 
 uint64 lockPrint = 0;
 
@@ -58,7 +56,7 @@ void printInt(int xx, int base, int sgn)
     LOCK();
     char buf[16];
     int i, neg;
-    uint64 x;
+    uint x;
 
     neg = 0;
     if(sgn && xx < 0){
@@ -74,25 +72,6 @@ void printInt(int xx, int base, int sgn)
     }while((x /= base) != 0);
     if(neg)
         buf[i++] = '-';
-
-    while(--i >= 0)
-        putc(buf[i]);
-
-    UNLOCK();
-}
-
-void printLong(uint64 x)
-{
-    LOCK();
-    int base = 10;
-
-    char buf[16];
-    int i;
-
-    i = 0;
-    do{
-        buf[i++] = digits[x % base];
-    }while((x /= base) != 0);
 
     while(--i >= 0)
         putc(buf[i]);
