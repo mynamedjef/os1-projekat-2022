@@ -30,6 +30,7 @@ int thread_prepare(
 int thread_start(thread_t handle);
 int thread_exit();
 void thread_dispatch();
+int get_thread_id();
 
 // ============== semafori ===============
 

@@ -17,6 +17,8 @@ TCB *TCB::output = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
+int TCB::stat_id = 0;
+
 void console_out(void*)
 {
     while (true) {

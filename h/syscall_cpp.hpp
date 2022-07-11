@@ -20,6 +20,7 @@ public:
     static void dispatch();
     static int sleep(time_t);
     static void wrapper(void*);
+    static int getThreadId();
 
 protected:
     Thread();

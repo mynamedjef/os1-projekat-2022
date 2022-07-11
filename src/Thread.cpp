@@ -39,3 +39,8 @@ void Thread::wrapper(void *thr)
 {
     ((Thread*)thr)->run();
 }
+
+int Thread::getThreadId()
+{
+    return get_thread_id();
+}

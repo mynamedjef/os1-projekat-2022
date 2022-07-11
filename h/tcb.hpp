@@ -55,7 +55,11 @@ public:
 
     static TCB *output;
 
+    static int stat_id;
+
     int start();
+
+    int get_id() const { return id; };
 
     void *operator new(size_t size) { return __mem_alloc(size); }
 
@@ -67,7 +71,8 @@ private:
             arg(arg),
             stack(stack),
             timeSlice(DEFAULT_TIME_SLICE),
-            sys_thread(false)
+            sys_thread(false),
+            id(stat_id++)
     {
         if (!main)
         {
@@ -97,6 +102,7 @@ private:
     uint64 timeSlice;
     Status status;
     bool sys_thread;
+    int id;
 
     friend class Riscv;
 

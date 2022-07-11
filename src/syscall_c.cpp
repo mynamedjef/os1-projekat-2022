@@ -155,3 +155,9 @@ void putc(char c)
     load_args();
     invoke(PUTC);
 }
+
+int get_thread_id()
+{
+    invoke(THREAD_ID);
+    return (int)retval();
+}

@@ -106,6 +106,12 @@ uint64 Riscv::syscall(uint64 *args)
         int val = TCB::exit();
         retval = val;
     }
+    else if (opcode == THREAD_ID)
+    {
+        TCB::timeSliceCounter = 0;
+        TCB::dispatch();
+        retval = TCB::running->get_id();
+    }
     else if (opcode == SEM_OPEN)
     {
         sem_t *handle = (sem_t*)args[1];

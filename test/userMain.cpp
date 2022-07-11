@@ -1,20 +1,49 @@
-//#include "../test/Threads_C_API_test.hpp" // zadatak 2, niti C API i sinhrona promena konteksta
-//#include "../test/Threads_CPP_API_test.hpp" // zadatak 2., niti CPP API i sinhrona promena konteksta
 
-//#include "../test/ConsumerProducer_C_API_test.h" // zadatak 3., kompletan C API sa semaforima, sinhrona promena konteksta
-//#include "../test/ConsumerProducer_CPP_Sync_API_test.hpp" // zadatak 3., kompletan CPP API sa semaforima, sinhrona promena konteksta
+#include "../h/syscall_c.h"
+#include "../test/printing.hpp"
 
-//#include "../test/ThreadSleep_C_API_test.hpp" // thread_sleep test C API
-#include "../test/ConsumerProducer_CPP_API_test.hpp" // zadatak 4. CPP API i asinhrona promena konteksta
+struct args {
+    sem_t user_sem, mutex;
+    char id;
+};
 
-void userMain() {
-    //Threads_C_API_test(); // zadatak 2., niti C API i sinhrona promena konteksta
-    //Threads_CPP_API_test(); // zadatak 2., niti CPP API i sinhrona promena konteksta
+const int worker_cnt = 3;
+const int print_cnt = 10;
+const int timeout = 5;
 
-    //producerConsumer_C_API(); // zadatak 3., kompletan C API sa semaforima, sinhrona promena konteksta
-    //producerConsumer_CPP_Sync_API(); // zadatak 3., kompletan CPP API sa semaforima, sinhrona promena konteksta
+void worker(void *arg)
+{
+    args *a = (args*)arg;
+    for (int i = 0; i < print_cnt; i++) {
+         time_sleep(timeout);
+         sem_wait(a->mutex);
 
-    //testSleeping(); // thread_sleep test C API
-    ConsumerProducerCPP::testConsumerProducer(); // zadatak 4. CPP API i asinhrona promena konteksta, kompletan test svega
+         int id = get_thread_id();
+         char worker = a->id;
+         putc(worker);
+         putc(':');
+         printInt(id);
+         putc(',');
 
+         sem_signal(a->mutex);
+    }
+    sem_signal(a->user_sem);
+    delete a;
+}
+
+void userMain()
+{
+    sem_t user_sem, mutex;
+    sem_open(&user_sem, 0);
+    sem_open(&mutex, 1);
+    thread_t workers[worker_cnt];
+    for (int i = 0; i < worker_cnt; i++) {
+        args *a = new args{user_sem, mutex, (char)('A' + i)};
+        thread_create(&workers[i], worker, a);
+    }
+
+    sem_wait(user_sem);
+    sem_wait(user_sem);
+    sem_wait(user_sem);
+    putc('\n');
 }
