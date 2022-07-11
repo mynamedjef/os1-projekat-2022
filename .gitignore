@@ -2,3 +2,4 @@ kernel
 kernel.asm
 .idea/
 build/
+.gdbinit
