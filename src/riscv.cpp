@@ -7,10 +7,13 @@
 #include "../h/_thread.hpp"
 #include "../h/_sem.hpp"
 #include "../h/_sleeplist.hpp"
+#include "../h/locking.hpp"
 
 _buffer *Riscv::bufin = nullptr;
 
 _buffer *Riscv::bufout = nullptr;
+
+bool Riscv::sie = false;
 
 void Riscv::init()
 {
@@ -81,7 +84,7 @@ uint64 Riscv::syscall(uint64 *args)
         void *ptr = (void*)args[1];
         retval = (uint64)__mem_free(ptr);
     }
-    else if (opcode == THREAD_DISPATCH)
+    else if (opcode == THREAD_DISPATCH) // TODO
     {
         TCB::timeSliceCounter = 0;
         TCB::dispatch();
@@ -150,6 +153,7 @@ void Riscv::handleSupervisorTrap()
     // argumenti se ovde učitavaju jer if-ovi pregaze neke registre (npr. a3,a4)
     uint64 args[5];
     loadParams(args);
+//    if (sie) { ms_sstatus(SSTATUS_SIE); }
 
     uint64 scause = r_scause();
     if (scause == ECALL_USER || scause == ECALL_SUPER)
@@ -163,14 +167,20 @@ void Riscv::handleSupervisorTrap()
     else if (scause == SOFTWARE)
     {
         // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
+        mc_sstatus(SSTATUS_SIE);
         TCB::timeSliceCounter++;
         _sleeplist::tick(); // proverava da li je vreme da se neke niti probude, i ako jeste budi ih
-        if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
+        ms_sstatus(SSTATUS_SIE);
+        if (Locking::lock_cnt <= 0 && TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {
             uint64 sepc = r_sepc();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
             w_sepc(sepc);
+        }
+        else if (Locking::lock_cnt > 0)
+        {
+            Locking::dispatch_call = true;
         }
         mc_sip(SIP_SSIP);
     }

@@ -6,6 +6,7 @@
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.h"
 #include "../h/_sleeplist.hpp"
+#include "../h/locking.hpp"
 
 TCB *TCB::running = nullptr;
 
@@ -117,6 +118,7 @@ int TCB::release()
 
 void TCB::dispatch()
 {
+    Locking::lock();
     TCB *old = running;
     if (old->status == RUNNING) {
         old->ready();
@@ -131,11 +133,14 @@ void TCB::dispatch()
 
     Riscv::restorePrivilege();
     TCB::contextSwitch(&old->context, &running->context);
+    Locking::dispatch_call = false;
+    Locking::unlock();
 }
 
 void TCB::threadWrapper()
 {
     Riscv::popSppSpie();
+    Locking::unlock();
     running->body(running->arg);
     running->setStatus(FINISHED);
     thread_dispatch();

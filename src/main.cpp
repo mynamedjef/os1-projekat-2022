@@ -28,6 +28,7 @@ int main()
     TCB *output = TCB::outputThread();
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
+    Riscv::sie = true;
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
     printString("main() started\n");
@@ -43,6 +44,9 @@ int main()
     sem_wait(user_sem);
 
     printString("main() cleaning up\n");
+    printString("lock_cnt: ");
+    printInt(Locking::lock_cnt);
+    putc('\n');
     while (Riscv::bufout->count() > 0) { thread_dispatch(); } // čekanje da se ispiše sve iz bafera ako već nije
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
 

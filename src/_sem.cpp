@@ -3,6 +3,7 @@
 //
 
 #include "../h/_sem.hpp"
+#include "../h/locking.hpp"
 
 _sem::~_sem()
 {
@@ -18,6 +19,7 @@ _sem::_sem(sem_t *handle, unsigned init)
 
 int _sem::close()
 {
+    Locking::lock();
     if (closed) {
         return -1;
     }
@@ -28,6 +30,7 @@ int _sem::close()
         TCB *tcb = waiting.removeFirst();
         tcb->release();
     }
+    Locking::unlock();
     return 0;
 }
 

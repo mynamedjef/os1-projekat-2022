@@ -86,6 +86,8 @@ public:
 
     static void init();
 
+    static bool sie;
+
 private:
 
     static void w_retval(uint64);

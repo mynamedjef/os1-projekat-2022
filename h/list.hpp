@@ -3,6 +3,7 @@
 #define _list_hpp
 
 #include "../lib/mem.h"
+#include "locking.hpp"
 
 template<typename T>
 class List
@@ -26,9 +27,11 @@ protected:
     void insertAfter(Elem *node, T *data)
     {
         if (!node) return;
+        Locking::lock();
         count++;
         Elem *next = node->next;
         node->next = new Elem(data, next);
+        Locking::unlock();
     }
 
 public:
@@ -42,14 +45,17 @@ public:
     
     void addFirst(T *data)
     {
+        Locking::lock();
         Elem *elem = new Elem(data, head);
         count++;
         head = elem;
         if (!tail) { tail = head; }
+        Locking::unlock();
     }
 
     void addLast(T *data)
     {
+        Locking::lock();
         Elem *elem = new Elem(data, 0);
         count++;
         if (tail)
@@ -60,11 +66,13 @@ public:
         {
             head = tail = elem;
         }
+        Locking::unlock();
     }
 
     T *removeFirst()
     {
         if (!head) { return 0; }
+        Locking::lock();
 
         count--;
         Elem *elem = head;
@@ -73,18 +81,23 @@ public:
 
         T *ret = elem->data;
         delete elem;
+        Locking::unlock();
         return ret;
     }
 
     T *peekFirst()
     {
+        Locking::lock();
         if (!head) { return 0; }
-        return head->data;
+        T *data = head->data;
+        Locking::unlock();
+        return data;
     }
 
     T *removeLast()
     {
         if (!head) { return 0; }
+        Locking::lock();
 
         count--;
         Elem *prev = 0;
@@ -100,13 +113,17 @@ public:
 
         T *ret = elem->data;
         delete elem;
+        Locking::unlock();
         return ret;
     }
 
     T *peekLast()
     {
+        Locking::lock();
         if (!tail) { return 0; }
-        return tail->data;
+        T data = tail->data;
+        Locking::unlock();
+        return data;
     }
 };
 

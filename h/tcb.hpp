@@ -57,6 +57,8 @@ public:
 
     int start();
 
+    static void dispatch();
+
     void *operator new(size_t size) { return __mem_alloc(size); }
 
     void operator delete(void *ptr) { __mem_free(ptr); }
@@ -107,8 +109,6 @@ private:
     static void threadWrapper();
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
-
-    static void dispatch();
 
     // gasi trenutnu nit
     static int exit();
