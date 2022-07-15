@@ -3,7 +3,6 @@
 //
 
 #include "../h/syscall_cpp.hpp"
-#include "../h/_thread.hpp"
 
 Thread::Thread(void (*body)(void*), void *arg)
 {
@@ -17,7 +16,7 @@ Thread::Thread()
 
 Thread::~Thread()
 {
-    delete myHandle;
+    thread_delete(myHandle);
 }
 
 int Thread::start()

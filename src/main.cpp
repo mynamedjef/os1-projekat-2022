@@ -6,7 +6,6 @@
 #include "../test/printing.hpp"
 #include "../h/riscv.hpp"
 #include "../h/userMain.hpp"
-#include "../h/_thread.hpp"
 #include "../h/_sleeplist.hpp"
 #include "../h/MemoryAllocator.hpp"
 

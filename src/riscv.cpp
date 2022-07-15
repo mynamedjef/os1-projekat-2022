@@ -4,7 +4,6 @@
 #include "../lib/console.h"
 #include "../test/printing.hpp"
 #include "../h/opcodes.hpp"
-#include "../h/_thread.hpp"
 #include "../h/_sem.hpp"
 #include "../h/_sleeplist.hpp"
 
@@ -93,8 +92,8 @@ uint64 Riscv::syscall(uint64 *args)
         void *arg        = (void*)args[3];
         uint64 *stack    = (uint64*)args[4];
 
-        _thread *t = new _thread(handle, routine, arg, stack);
-        if (opcode == THREAD_CREATE) { retval = t->start(); }
+        *handle = TCB::initThread(routine, arg, stack);
+        if (opcode == THREAD_CREATE) { retval = (*handle)->start(); }
     }
     else if (opcode == THREAD_START)
     {
@@ -105,6 +104,12 @@ uint64 Riscv::syscall(uint64 *args)
     {
         int val = TCB::exit();
         retval = val;
+    }
+    else if (opcode == THREAD_DELETE)
+    {
+        thread_t handle = (thread_t)args[1];
+        while (!handle->isFinished()) { TCB::dispatch(); }
+        delete handle;
     }
     else if (opcode == SEM_OPEN)
     {
