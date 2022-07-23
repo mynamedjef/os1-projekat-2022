@@ -117,6 +117,7 @@ int TCB::release()
 
 void TCB::dispatch()
 {
+    timeSliceCounter = 0;
     TCB *old = running;
     if (old->status == RUNNING) {
         old->ready();
@@ -137,8 +138,7 @@ void TCB::threadWrapper()
 {
     Riscv::popSppSpie();
     running->body(running->arg);
-    running->setStatus(FINISHED);
-    thread_dispatch();
+    thread_exit();
 }
 
 int TCB::sleep(time_t timeout)

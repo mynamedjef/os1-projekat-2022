@@ -101,6 +101,16 @@ void thread_dispatch()
     invoke(THREAD_DISPATCH);
 }
 
+// ovo nije zadato zadatkom, ali u C++ API postoji ~Thread() destruktor koji ne znam kako drugačije da se odradi.
+// u suštini thread_delete čeka završetak niti koja se briše i onda je briše. može se i implementirati da npr. nasilno gasi nit
+int thread_delete(thread_t handle)
+{
+    if (!handle) { return -1; }
+    load_args();
+    invoke(THREAD_DELETE);
+    return (retval() == 0) ? 0 : -2;
+}
+
 // ---------------- semafori -------------------
 
 int sem_open(sem_t *handle, unsigned init)
