@@ -14,20 +14,14 @@ private:
 
     char buf[BUFFER_SIZE];
 
-    int head, tail, cap, size;
-
-    void add(char c);
-
-    char remove();
+    int head, tail, size;
 
 public:
     void *operator new(size_t size) { return __mem_alloc(size); }
 
     void operator delete(void *ptr) { __mem_free(ptr); }
 
-    _buffer(int capacity);
-
-    _buffer() : _buffer(BUFFER_SIZE) { }
+    _buffer();
 
     ~_buffer();
 
@@ -39,9 +33,6 @@ public:
 
     // put() koji se koristi samo tokom prekidne rutine (kernel kod)
     void kernel_put(char x);
-
-    // put() koji se koristi u korisničkim funkcijama
-    void put(char x);
 
     int count() const { return size; }
 

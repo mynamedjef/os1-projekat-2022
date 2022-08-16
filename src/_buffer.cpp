@@ -4,11 +4,11 @@
 
 #include "../h/_buffer.hpp"
 
-_buffer::_buffer(int capacity) : head(0), tail(0), cap(capacity), size(0)
+_buffer::_buffer() : head(0), tail(0), size(0)
 {
     new _sem(&mutex_put, 1);
     new _sem(&mutex_get, 1);
-    new _sem(&free, cap);
+    new _sem(&free, BUFFER_SIZE);
     new _sem(&available, 0);
 }
 
@@ -27,7 +27,7 @@ char _buffer::kernel_get()
     mutex_get->wait();
 
     char ret = buf[head];
-    head = (head + 1) % cap;
+    head = (head + 1) % BUFFER_SIZE;
     size--;
 
     mutex_get->signal();
@@ -43,7 +43,7 @@ char _buffer::get()
     sem_wait(mutex_get);
 
     char ret = buf[head];
-    head = (head + 1) % cap;
+    head = (head + 1) % BUFFER_SIZE;
     size--;
 
     sem_signal(mutex_get);
@@ -58,23 +58,9 @@ void _buffer::kernel_put(char x)
     mutex_put->wait();
 
     buf[tail] = x;
-    tail = (tail + 1) % cap;
+    tail = (tail + 1) % BUFFER_SIZE;
     size++;
 
     mutex_put->signal();
     available->signal();
-}
-
-// put() koji se koristi u korisničkim funkcijama
-void _buffer::put(char x)
-{
-    sem_wait(free);
-    sem_wait(mutex_put);
-
-    buf[tail] = x;
-    tail = (tail + 1) % cap;
-    size++;
-
-    sem_signal(mutex_put);
-    sem_signal(available);
 }
