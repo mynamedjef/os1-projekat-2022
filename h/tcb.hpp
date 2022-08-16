@@ -62,18 +62,19 @@ public:
     void operator delete(void *ptr) { __mem_free(ptr); }
 
 private:
-    TCB(Body body, void *arg, uint64 *stack, bool main=false) :
+    // ako je body == nullptr, nit u pitanju je main nit. samim tim automatski je RUNNING. isto tako kontekst/stek su joj null
+    TCB(Body body, void *arg, uint64 *stack) :
             body(body),
             arg(arg),
             stack(stack),
             timeSlice(DEFAULT_TIME_SLICE),
+            status(CREATED),
             sys_thread(false)
     {
-        if (!main)
+        if (body != nullptr)
         {
             context = {(uint64) &threadWrapper,
                        (uint64) &stack[DEFAULT_STACK_SIZE]};
-            status = CREATED;
         }
         else
         {
@@ -81,8 +82,6 @@ private:
             status = RUNNING;
         }
     }
-
-    TCB() : TCB(nullptr, nullptr, nullptr, true) { }
 
     struct Context
     {

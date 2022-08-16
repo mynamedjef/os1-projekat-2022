@@ -33,7 +33,7 @@ void _sleeplist::insert(SleepNode *data)
 
 void _sleeplist::insert(TCB *tcb, time_t timeout)
 {
-    insert(new SleepNode(tcb, timeout + Sleeping.passed));
+    insert(new SleepNode(tcb, timeout + passed));
 }
 
 TCB *_sleeplist::pop()
@@ -52,10 +52,10 @@ SleepNode *_sleeplist::pop_node()
 
 void _sleeplist::tick()
 {
-    Sleeping.total_passed++;
-    Sleeping.passed = (Sleeping.size() > 0) ?
-            Sleeping.passed + 1 :
-            0;
+    total_passed++;
+    passed = (Sleeping.size() > 0) ?
+             passed + 1 :
+             0;
     
     while (ready()) {
         TCB *tcb = pop();
@@ -66,5 +66,5 @@ void _sleeplist::tick()
 bool _sleeplist::ready()
 {
     return (Sleeping.size() > 0 &&
-        Sleeping.peekFirst()->timeout <= Sleeping.passed);
+        Sleeping.peekFirst()->timeout <= passed);
 }

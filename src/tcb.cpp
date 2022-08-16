@@ -49,7 +49,7 @@ TCB *TCB::initThread(Body body, void *arg, uint64 *stack)
 TCB *TCB::kernelThread()
 {
     if (!kernel) {
-        TCB *thr = new TCB();
+        TCB *thr = new TCB(nullptr, nullptr, nullptr);
         running = kernel = thr;
         kernel->sys_thread = true;
     }

@@ -5,9 +5,10 @@
 #include "../h/tcb.hpp"
 #include "../test/printing.hpp"
 #include "../h/riscv.hpp"
-#include "../h/userMain.hpp"
 #include "../h/_sleeplist.hpp"
 #include "../h/MemoryAllocator.hpp"
+
+extern void userMain();
 
 void user_wrapper(void *sem)
 {
