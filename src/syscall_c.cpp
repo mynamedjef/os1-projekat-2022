@@ -69,8 +69,9 @@ int mem_free(void *ptr)
 int thread_create(thread_t *handle, void (*start_routine)(void*), void *arg)
 {
     if (!handle) { return -1; }
+    if (!start_routine) { return -2; }
     void *stack = mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
-    if (!stack) { return -2; }
+    if (!stack) { return -3; }
     return thread_create_helper(handle, start_routine, arg, stack);
 }
 

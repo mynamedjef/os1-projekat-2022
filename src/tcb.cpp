@@ -136,6 +136,7 @@ void TCB::dispatch()
 
 void TCB::threadWrapper()
 {
+    Riscv::restorePrivilege();
     Riscv::popSppSpie();
     running->body(running->arg);
     thread_exit();
