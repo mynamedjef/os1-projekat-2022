@@ -78,3 +78,21 @@ void printInt(int xx, int base, int sgn)
 
     UNLOCK();
 }
+
+void printHexa(uint64 xx, bool trim)
+{
+    LOCK();
+    char buffer[16];
+    for (int i = 7; i >= 0; i--)
+    {
+        uint8 byte = (xx >> (8 * i)) & 0xFF; // i-ti bajt
+        buffer[15 - (i*2 + 1)] = ("0123456789ABCDEF"[byte >> 4]);
+        buffer[15 - (i*2)] = ("0123456789ABCDEF"[byte & 0x0F]);
+    }
+
+    putc('0'); putc('x');
+    int i = 0;
+    for (; trim && i < 15 && buffer[i] == '0'; i++);
+    for (;i < 16; putc(buffer[i++]));
+    UNLOCK();
+}
