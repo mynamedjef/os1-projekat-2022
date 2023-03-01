@@ -23,6 +23,12 @@ public:
 
     static void init_memory();
 
+private:
+    static uint64 offset;
+
+    static uint8 *base_ptr;
+
+    static uint8 *end_ptr;
 };
 
 

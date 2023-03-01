@@ -3,23 +3,39 @@
 //
 
 #include "../h/MemoryAllocator.hpp"
-#include "../lib/console.h"
 
 MemDescr *MemoryAllocator::free = nullptr;
 
 MemDescr *MemoryAllocator::occupied = nullptr;
 
+uint8 *MemoryAllocator::base_ptr = nullptr;
+
+uint8 *MemoryAllocator::end_ptr = nullptr;
+
 uint64 MemoryAllocator::allocd = 0;
 
 uint64 MemoryAllocator::deallocd = 0;
 
+uint64 MemoryAllocator::offset = 0;  // isključivo za debagovanje
+
 void MemoryAllocator::init_memory() {
+    base_ptr = (uint8*)HEAP_START_ADDR + offset;
+    end_ptr = (uint8*)HEAP_END_ADDR;
+
+    // poravnanje na MEM_BLOCK_SIZE
+    uint64 remainder = (uint64)base_ptr % MEM_BLOCK_SIZE;
+    if (remainder != 0)
+    {
+        base_ptr += MEM_BLOCK_SIZE - remainder;
+    }
+    end_ptr = (uint8*)((uint64)end_ptr & ~(MEM_BLOCK_SIZE-1));
+
     // inicijalizacija početnog slobodnog segmenta
-    free = (MemDescr*)HEAP_START_ADDR;
+    free = (MemDescr*)base_ptr;
     MemDescr *mem = free;
 
     mem->prev = mem->next = nullptr;
-    mem->size = (size_t)((char*)HEAP_END_ADDR - (char*)HEAP_START_ADDR - MEM_BLOCK_SIZE);
+    mem->size = (size_t)(end_ptr - base_ptr);  // zagarantovano poravnato jer su end_ptr i base_ptr poravnati već
     mem->status = FREE;
 }
 
