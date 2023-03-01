@@ -6,18 +6,25 @@
 
 class TCB;
 
+/*
+ * najobičniji FIFO scheduler implementiran jednostruko ulančanom listom sa head/tail pokazivačima
+ * prednost je što nema nikakvo dinamičko zauzeće memorije, jedino što TCB mora da ima polje `TCB *next`.
+ */
 class Scheduler
 {
 private:
-    static List<TCB> readyThreadQueue;
+    static TCB *head;
+
+    static TCB *tail;
+
+    static int count;  // za debagovanje
 
 public:
     static TCB *get();
 
-    static void put(TCB *ccb);
+    static void put(TCB*);
 
     static int size();
-
 };
 
 #endif //_scheduler_hpp

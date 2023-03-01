@@ -69,7 +69,8 @@ private:
             stack(stack),
             timeSlice(DEFAULT_TIME_SLICE),
             status(CREATED),
-            sys_thread(false)
+            sys_thread(false),
+            next(nullptr)
     {
         if (body != nullptr)
         {
@@ -97,7 +98,11 @@ private:
     Status status;
     bool sys_thread;
 
+    TCB *next;  // potrebno za scheduler
+
     friend class Riscv;
+
+    friend class Scheduler;
 
     friend class _sem;
 
