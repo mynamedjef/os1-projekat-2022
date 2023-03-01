@@ -3,3 +3,5 @@ kernel.asm
 .idea/
 build/
 .gdbinit
+test/*.s
+src/*.s
