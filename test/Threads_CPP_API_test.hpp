@@ -10,6 +10,9 @@ bool finishedB = false;
 bool finishedC = false;
 bool finishedD = false;
 
+const int N = 1;
+bool finished[4] = {0};
+
 uint64 fibonacci(uint64 n) {
     if (n == 0 || n == 1) { return n; }
     if (n % 10 == 0) { thread_dispatch(); }
@@ -60,24 +63,26 @@ void WorkerA::workerBodyA(void *arg) {
     for (uint64 i = 0; i < 10; i++) {
         printString("A: i="); printInt(i); printString("\n");
         for (uint64 j = 0; j < 10000; j++) {
-            for (uint64 k = 0; k < 30000; k++) { /* busy wait */ }
+            for (uint64 k = 0; k < 4000; k++) { /* busy wait */ }
             thread_dispatch();
         }
     }
     printString("A finished!\n");
     finishedA = true;
+    finished[0] = true;
 }
 
 void WorkerB::workerBodyB(void *arg) {
     for (uint64 i = 0; i < 16; i++) {
         printString("B: i="); printInt(i); printString("\n");
         for (uint64 j = 0; j < 10000; j++) {
-            for (uint64 k = 0; k < 30000; k++) { /* busy wait */ }
+            for (uint64 k = 0; k < 4000; k++) { /* busy wait */ }
             thread_dispatch();
         }
     }
     printString("B finished!\n");
     finishedB = true;
+    finished[1] = true;
     thread_dispatch();
 }
 
@@ -104,8 +109,8 @@ void WorkerC::workerBodyC(void *arg) {
     }
 
     printString("A finished!\n");
-    finishedC = true;
     thread_dispatch();
+    finished[2] = true;
 }
 
 void WorkerD::workerBodyD(void* arg) {
@@ -126,25 +131,43 @@ void WorkerD::workerBodyD(void* arg) {
     }
 
     printString("D finished!\n");
-    finishedD = true;
     thread_dispatch();
+    finished[3] = true;
 }
 
 
 void Threads_CPP_API_test() {
     Thread* threads[4];
 
-    threads[0] = new WorkerA();
-    printString("ThreadA created\n");
+    int j = 0;
+    threads[j++] = new WorkerA();
+    threads[j++] = new WorkerB();
+//    threads[j++] = new WorkerC();
+//    threads[j++] = new WorkerD();
+    
+    threads[0]->start();
+    threads[1]->start();
+    while (!finished[1] || !finished[0]) {
+        thread_dispatch();
+    }
+    delete threads[0];
+    delete threads[1];
+    return;
+    for (int i = 0; i < N; i++) { threads[i]->start(); }
+    for (int i = 0; i < N; i++)
+    {
+        if (!finished[i]) {
+            i = 0;
+            thread_dispatch();
+        }
+    }
+    for (int i = 0; i < N; i++) { delete threads[i]; }
+    return;
 
-    threads[1] = new WorkerB();
-    printString("ThreadB created\n");
-
-    threads[2] = new WorkerC();
-    printString("ThreadC created\n");
-
-    threads[3] = new WorkerD();
-    printString("ThreadD created\n");
+    for (int i = 0; i < 4; i++) {
+        printHexa((uint64)threads[i]);
+        putc('\n');
+    }
 
     for(int i=0; i<4; i++) {
         threads[i]->start();
@@ -154,7 +177,10 @@ void Threads_CPP_API_test() {
         Thread::dispatch();
     }
 
-    for (auto thread: threads) { delete thread; }
+    for (auto thread: threads)
+    {
+        delete thread;
+    }
 }
 
 #endif //XV6_THREADS_CPP_API_TEST_HPP

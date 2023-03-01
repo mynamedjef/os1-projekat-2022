@@ -15,8 +15,9 @@ typedef uint64 time_t;
 static const size_t DEFAULT_STACK_SIZE = 4096;
 static const size_t DEFAULT_TIME_SLICE = 2;
 
-extern const void* HEAP_START_ADDR;
-extern const void* HEAP_END_ADDR;
+extern const void* HEAP_START_ADDR;  // 2_281_701_376
+extern const void* HEAP_END_ADDR;    // 2_147_523_728
+// total heap size = 134_177_648 < 2^27
 
 static const size_t MEM_BLOCK_SIZE = 64;
 

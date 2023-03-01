@@ -11,6 +11,8 @@ _buffer *Riscv::bufin = nullptr;
 
 _buffer *Riscv::bufout = nullptr;
 
+bool Riscv::exception_occured = false;
+
 void Riscv::init()
 {
     bufin = new _buffer;
@@ -41,6 +43,8 @@ void Riscv::restorePrivilege()
 
 inline void Riscv::unexpectedTrap()
 {
+    if (exception_occured) { return; }
+    exception_occured = true;
     uint64 scause = r_scause();
     uint64 stval = r_stval();
     uint64 stvec = r_stvec();
@@ -51,15 +55,15 @@ inline void Riscv::unexpectedTrap()
     printString("\n");
 
     printString("stval: ");
-    printInt(stval);
+    printHexa(stval);
     printString("\n");
 
     printString("stvec: ");
-    printInt(stvec);
+    printHexa(stvec);
     printString("\n");
 
     printString("sepc: ");
-    printInt(sepc);
+    printHexa(sepc);
     printString("\n");
 }
 
@@ -105,8 +109,24 @@ uint64 Riscv::syscall(uint64 *args)
     }
     else if (opcode == THREAD_DELETE)
     {
-        thread_t handle = (thread_t)args[1];
-        delete handle;
+        int fsw = 0;
+        if (!fsw)
+        {
+            thread_t handle = (thread_t)args[1];
+            while (!handle->isFinished())
+            {
+                TCB::dispatch();
+            }
+            delete handle;
+        }
+        else
+        {
+            while (!((thread_t)args[1])->isFinished())
+            {
+                TCB::dispatch();
+            }
+            delete (thread_t)args[1];
+        }
     }
     else if (opcode == SEM_OPEN)
     {

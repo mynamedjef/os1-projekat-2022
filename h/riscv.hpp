@@ -86,6 +86,8 @@ public:
 
     static void init();
 
+    static bool exception_occured;
+
 private:
 
     static void w_retval(uint64);

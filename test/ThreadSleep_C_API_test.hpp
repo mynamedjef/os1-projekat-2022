@@ -34,6 +34,8 @@ void testSleeping() {
     }
 
     while (!(finished[0] && finished[1])) {}
+    thread_delete(sleepyThread[0]);
+    thread_delete(sleepyThread[1]);
 }
 
 #endif //XV6_THREADSLEEP_C_API_TEST_HPP
