@@ -8,14 +8,19 @@
 #include "../lib/hw.h"
 #include "MemDescr.hpp"
 
+struct alloc_info
+{
+    uint64 bytes;
+    uint64 times;
+};
 
 class MemoryAllocator {
 public:
     static MemDescr *free, *occupied;
 
-    static uint64 allocd;
+    static alloc_info allocd;
 
-    static uint64 deallocd;
+    static alloc_info deallocd;
 
     static void *alloc(size_t);
 

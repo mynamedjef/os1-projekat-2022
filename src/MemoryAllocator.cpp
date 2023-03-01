@@ -12,9 +12,9 @@ uint8 *MemoryAllocator::base_ptr = nullptr;
 
 uint8 *MemoryAllocator::end_ptr = nullptr;
 
-uint64 MemoryAllocator::allocd = 0;
+alloc_info MemoryAllocator::allocd = {0, 0};
 
-uint64 MemoryAllocator::deallocd = 0;
+alloc_info MemoryAllocator::deallocd = {0, 0};
 
 uint64 MemoryAllocator::offset = 0;  // isključivo za debagovanje
 
@@ -45,7 +45,8 @@ void *MemoryAllocator::alloc(size_t sz) {
          sz :
          (sz / MEM_BLOCK_SIZE + 1) * MEM_BLOCK_SIZE;
 
-    allocd += sz;
+    allocd.bytes += sz;
+    allocd.times++;
 
     for (MemDescr *curr = free; curr; curr = curr->next) {
         if (curr->size == sz) { // ako je tačna veličina segmenta, samo prebaci iz free u occupied listu
@@ -68,6 +69,8 @@ void *MemoryAllocator::alloc(size_t sz) {
     }
 
     // nije našao adekvatan segment, vrati nullptr
+    allocd.bytes -= sz;
+    allocd.times--;
     return nullptr;
 }
 
@@ -79,7 +82,8 @@ int MemoryAllocator::mem_free(void *ptr)
     if (mem->status != ALLOCATED) // nije alociran segment
         return -1;
 
-    deallocd += mem->size;
+    deallocd.bytes += mem->size;
+    deallocd.times++;
 
     // skloni segment iz okupiranih, ubaci u slobodne i squash-uj
     remove(&occupied, mem);

@@ -103,7 +103,7 @@ void thread_dispatch()
 }
 
 // ovo nije zadato zadatkom, ali u C++ API postoji ~Thread() destruktor koji ne znam kako drugačije da se odradi.
-// u suštini thread_delete čeka završetak niti koja se briše i onda je briše. može se i implementirati da npr. nasilno gasi nit
+// u suštini thread_delete briše nit. u slučaju da nit i dalje radi, nedefinisano je ponašanje
 int thread_delete(thread_t handle)
 {
     if (!handle) { return -1; }

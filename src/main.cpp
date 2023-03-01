@@ -46,10 +46,19 @@ int main()
     while (Riscv::bufout->count() > 0) { thread_dispatch(); } // čekanje da se ispiše sve iz bafera ako već nije
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
 
-    delete kernel;
+    // oslobađamo semafor na kome je glavna kernel nit čekala korisnika
+    delete user_sem;
+
+    // oslobađamo bafere za standardni i/o
+    delete Riscv::bufout;
+    delete Riscv::bufin;
+
+    // oslobađamo sve niti koje smo napravili
     delete user;
     delete idle;
     delete output;
 
+    // oslobađamo glavnu nit na ovaj način jer bi običan delete pokušao da obriše i stek glavne niti
+    __mem_free((void*)kernel);
     return 0;
 }

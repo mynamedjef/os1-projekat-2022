@@ -23,7 +23,10 @@ public:
         IDLE
     };
 
-    ~TCB() { delete[] stack; }
+    ~TCB()
+    {
+        __mem_free(stack);
+    }
 
     bool isFinished() const { return status == FINISHED; }
 
