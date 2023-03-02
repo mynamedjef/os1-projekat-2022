@@ -8,6 +8,8 @@
 #include "../lib/hw.h"
 #include "scheduler.hpp"
 
+#define ID_LENGTH 20
+
 // Thread Control Block
 class TCB
 {
@@ -27,6 +29,8 @@ public:
     {
         __mem_free(stack);
     }
+
+    void set_id(const char *str);
 
     bool isFinished() const { return status == FINISHED; }
 
@@ -75,6 +79,7 @@ private:
             sys_thread(false),
             next(nullptr)
     {
+        identificator[0] = '\0';
         if (body != nullptr)
         {
             context = {(uint64) &threadWrapper,
@@ -100,6 +105,7 @@ private:
     uint64 timeSlice;
     Status status;
     bool sys_thread;
+    char identificator[ID_LENGTH+1];  // olakšava debagovanje
 
     TCB *next;  // potrebno za scheduler
 

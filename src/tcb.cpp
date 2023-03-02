@@ -17,6 +17,17 @@ TCB *TCB::output = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
+void TCB::set_id(const char *str)
+{
+    int i = 0;
+    while (str[i] && i < ID_LENGTH)
+    {
+        identificator[i] = str[i];
+        i++;
+    }
+    identificator[i] = '\0';
+}
+
 void console_out(void*)
 {
     while (true) {
@@ -46,16 +57,23 @@ TCB *TCB::initThread(Body body, void *arg, uint64 *stack)
     return new TCB(body, arg, stack);
 }
 
+/*
+* glavna kernel nit koja kreće sa main(). Očigledno je ona running na početku programa, i već ima svoj stek
+*/
 TCB *TCB::kernelThread()
 {
     if (!kernel) {
         TCB *thr = new TCB(nullptr, nullptr, nullptr);
         running = kernel = thr;
         kernel->sys_thread = true;
+        kernel->set_id("KERNEL\0");
     }
     return kernel;
 }
 
+/*
+* nit za uposleno čekanje koja se pokreće samo dok nema ništa drugo u scheduleru.
+*/
 TCB *TCB::idleThread()
 {
     if (!idle) {
@@ -63,16 +81,21 @@ TCB *TCB::idleThread()
         idle = initThread(idleWrapper, nullptr, stack);
         idle->status = IDLE;
         idle->sys_thread = true;
+        idle->set_id("IDLE\0");
     }
     return idle;
 }
 
+/*
+* nit za ispis. pokreće se odmah, i ispisuje kada god se nešto nađe u izlaznom baferu
+*/
 TCB *TCB::outputThread()
 {
     if (!output) {
         uint64 *stack = (uint64*)__mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
         output = createThread(console_out, nullptr, stack);
         output->sys_thread = true;
+        output->set_id("OUTPUT\0");
     }
     return output;
 }
