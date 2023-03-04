@@ -3,6 +3,17 @@
 #include "../h/buddy.hpp"
 #include "../test/printing.hpp"
 
+/*
+* Koliko najviše moguće najviše imamo keševa.
+* Samo za debagovanje, tj. za kmem_all_caches_info().
+*/
+#define MAX_CACHE_COUNT (BUFFER_COUNT + 10)
+
+static kmem_cache_t *all_caches[MAX_CACHE_COUNT] = {0};
+
+static int cache_id = 0;
+
+// Mali memorijski baferi
 static kmem_cache_t *buffers[BUFFER_COUNT] = {0};
 
 /*
@@ -72,6 +83,7 @@ void kmem_init(void *space, int block_num)
 {
     uint8 *end_ptr = (uint8*)space + (block_num << BLOCK_SIZE_LOG2);
     for (int i = 0; i < BUFFER_COUNT; buffers[i++] = nullptr);
+    for (int i = 0; i < MAX_CACHE_COUNT; all_caches[i++] = nullptr);
     buddy::init(space, (void*)end_ptr);
 }
 
@@ -113,6 +125,7 @@ kmem_cache_t *kmem_cache_create(const char *name, size_t obj_size,
     // alociranje prostora za ploču (veličina ploče + veličina objekta * minimum objekata po ploči)
     cache->slab_size = slab_size(sizeof(kmem_slab_t) + (obj_size << OBJECTS_PER_SLAB_LOG2));
 
+    all_caches[cache_id++] = cache;
     return cache;
 }
 
@@ -269,12 +282,13 @@ void *kmalloc(size_t size)
     if (buffers[idx] == nullptr) // moramo da napravimo mali memorijski bafer
     {
         // upisivanje imena bafera
-        const char *name = "BUF_";
+        const char *name = "BUF2^";
         char name_buf[KMEM_CACHE_NAME_SIZE];
         int i = 0;
-        for (; i < 4; i++) { name_buf[i] = name[i]; }
-        name_buf[i++] = (idx / 10) + '0';
-        name_buf[i++] = (idx % 10) + '0';
+        for (; i < 5; i++) { name_buf[i] = name[i]; }
+        uint log2 = MAX_BUFFER_LOG2 - idx;
+        name_buf[i++] = (log2 / 10) + '0';
+        name_buf[i++] = (log2 % 10) + '0';
         name_buf[i] = '\0';
         // kreiranje bafera
         buffers[idx] = kmem_cache_create(name_buf, gross, nullptr, nullptr);
@@ -311,6 +325,15 @@ void kmem_cache_destroy(kmem_cache_t *cachep)
     if (cachep == nullptr)
     {
         return;
+    }
+
+    for (int i = 0; i < cache_id; i++)
+    {
+        if (all_caches[i] == cachep)
+        {
+            all_caches[i] = nullptr;
+            break;
+        }
     }
 
     const int N = 3;
@@ -362,14 +385,14 @@ void kmem_cache_info(kmem_cache_t *cachep)
     uint block_cnt = (slab_cnt * cachep->slab_size) >> BLOCK_SIZE_LOG2;
 
     printString("======== "); printString(cachep->name); printString(" ========\n");
-    /*
+    ///*
     printString("full: ");
     for (kmem_slab_t *curr = cachep->full; curr; curr = curr->next) { printHexa((uint64)curr); putc(' '); } putc('\n');
     printString("mixed: ");
     for (kmem_slab_t *curr = cachep->mixed; curr; curr = curr->next) { printHexa((uint64)curr); putc(' '); } putc('\n');
     printString("empty: ");
     for (kmem_slab_t *curr = cachep->empty; curr; curr = curr->next) { printHexa((uint64)curr); putc(' '); } putc('\n');
-    */
+    //*/
     printString("Veličina jednog objekta: "); printInt(cachep->obj_size); putc('\n');
     printString("Veličina celog keša: "); printInt(block_cnt); printString(" blok(ova)\n");
     printString("Broj ploča: "); printInt(slab_cnt); putc('\n');
@@ -378,7 +401,7 @@ void kmem_cache_info(kmem_cache_t *cachep)
     {
         uint percent_used = 100 * total_objects / maximum_objects;
         printString("Procentualna popunjenost keša: "); printInt(percent_used); printString("% (");
-        printInt(total_objects); putc('/'); printInt(maximum_objects); printString(" maksimalno objekata)\n");
+        printInt(total_objects); putc('/'); printInt(maximum_objects); printString(" objekata alocirano)\n");
     }
     printString("=========================\n");
 }
@@ -402,4 +425,9 @@ void kmem_cache_error(kmem_cache_t *cachep)
     {
         return;
     }
+}
+
+void kmem_all_caches_info()
+{
+    for (int i = 0; i < cache_id; kmem_cache_info(all_caches[i++]));
 }

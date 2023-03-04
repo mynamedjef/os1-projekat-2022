@@ -79,4 +79,6 @@ void kmem_cache_error(kmem_cache_t *cachep); // Print error message
 
 void kmem_buf_info(size_t size);
 
+void kmem_all_caches_info();
+
 #endif //OS1_2022_SLAB_HPP
