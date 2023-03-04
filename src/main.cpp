@@ -23,9 +23,9 @@ int main()
 
     Riscv::init();
 
-    TCB *kernel = TCB::kernelThread();
-    TCB *idle = TCB::idleThread();
-    TCB *output = TCB::outputThread();
+    TCB::kernelThread();
+    TCB::idleThread();
+    TCB::outputThread();
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
@@ -42,14 +42,22 @@ int main()
     // čekanje korisnika
     sem_wait(user_sem);
 
+    // onemogućavamo prekide od tajmera za slučaj da je neka korisnička nit zalutala
+    Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
+    // u slučaju da nakon userMain() neka korisnička nit nije završila, nasilno je gasimo
+    Scheduler::flush_user_threads();
+
     printString("main() cleaning up\n");
     while (Riscv::bufout->count() > 0) { thread_dispatch(); } // čekanje da se ispiše sve iz bafera ako već nije
-    Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
 
-    delete kernel;
-    delete user;
-    delete idle;
-    delete output;
+    // oslobađanje sve memorije
+    kmem_buffers_destroy();
+    kmem_cache_destroy(SleepNode::cachep);
+    kmem_cache_destroy(_sem::cachep);
+    kmem_cache_destroy(_buffer::cachep);
+    kmem_cache_destroy(List<TCB>::cachep);
+    kmem_cache_destroy(TCB::cachep);
+    kmem_cache_destroy(_stack::cachep);
 
     return 0;
 }

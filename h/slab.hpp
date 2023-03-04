@@ -74,6 +74,8 @@ void kfree(const void *objp); // Deallocate one small memory buffer
 
 void kmem_cache_destroy(kmem_cache_t *cachep); // Deallocate cache
 
+void kmem_buffers_destroy(); // Deallocate all caches for small memory buffers
+
 void kmem_cache_info(kmem_cache_t *cachep); // Print cache info
 void kmem_cache_error(kmem_cache_t *cachep); // Print error message
 

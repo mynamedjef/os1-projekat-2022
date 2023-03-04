@@ -353,6 +353,20 @@ void kmem_cache_destroy(kmem_cache_t *cachep)
 }
 
 /*
+* Osobađamo svaki keš koji služi za male memorijske bafere
+*/
+void kmem_buffers_destroy()
+{
+    for (int i = 0; i < BUFFER_COUNT; i++)
+    {
+        if (buffers[i] != nullptr)
+        {
+            kmem_cache_destroy(buffers[i]);
+        }
+    }
+}
+
+/*
 * Ispisujemo sledeće stvari vezane za keš "cachep":
 * 1. Veličinu jednog objekta u kešu;
 * 2. Veličinu celog keša u blokovima veličine BLOCK_SIZE;

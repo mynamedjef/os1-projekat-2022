@@ -16,8 +16,6 @@ protected:
 
         Elem(T *data, Elem *next) : data(data), next(next) {}
 
-        static kmem_cache_t *cachep;
-
         void *operator new(size_t size)
         {
             if (cachep == nullptr)
@@ -46,6 +44,8 @@ protected:
     }
 
 public:
+    static kmem_cache_t *cachep;
+
     List() : head(0), tail(0), count(0) {}
 
     List(const List<T> &) = delete;
@@ -125,6 +125,6 @@ public:
 };
 
 template<typename T>
-kmem_cache_t *List<T>::Elem::cachep = nullptr;
+kmem_cache_t *List<T>::cachep = nullptr;
 
 #endif //_list_hpp
