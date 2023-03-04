@@ -89,7 +89,11 @@ uint64 Riscv::syscall(uint64 *args)
         thread_t *handle = (thread_t*)args[1];
         Body routine     = (Body)args[2];
         void *arg        = (void*)args[3];
-        uint64 *stack    = (uint64*)args[4];
+        uint64 *stack    = (uint64*)(new _stack);
+        if (stack == nullptr)
+        {
+            return 1;
+        }
 
         *handle = TCB::initThread(routine, arg, stack);
         if (opcode == THREAD_CREATE) { retval = (*handle)->start(); }
