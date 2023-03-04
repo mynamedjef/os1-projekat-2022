@@ -75,6 +75,11 @@ void kmem_init(void *space, int block_num)
     buddy::init(space, (void*)end_ptr);
 }
 
+void kmem_init(void *heap_start, void *heap_end)
+{
+    buddy::init(heap_start, heap_end);
+}
+
 /*
 * Pravi keš sa imenom "name" koji će sadržavati objekte
 * veličine "obj_size" i koristiti "ctor/dtor" kao konstruktor/destruktor.

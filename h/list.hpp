@@ -3,6 +3,7 @@
 #define _list_hpp
 
 #include "../lib/mem.h"
+#include "slab.hpp"
 
 template<typename T>
 class List
@@ -14,9 +15,22 @@ protected:
         Elem *next;
 
         Elem(T *data, Elem *next) : data(data), next(next) {}
-        
-        void *operator new(size_t size) { return __mem_alloc(size); }
-        void operator delete(void *ptr) { __mem_free(ptr); }
+
+        static kmem_cache_t *cachep;
+
+        void *operator new(size_t size)
+        {
+            if (cachep == nullptr)
+            {
+                cachep = kmem_cache_create("LSTNODE\0", sizeof(Elem), nullptr, nullptr);
+            }
+            return kmem_cache_alloc(cachep);
+        }
+
+        void operator delete(void *ptr)
+        {
+            kmem_cache_free(cachep, ptr);
+        }
     };
 
     Elem *head, *tail;
@@ -109,5 +123,8 @@ public:
         return tail->data;
     }
 };
+
+template<typename T>
+kmem_cache_t *List<T>::Elem::cachep = nullptr;
 
 #endif //_list_hpp

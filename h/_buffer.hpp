@@ -5,7 +5,9 @@
 #ifndef _buffer_hpp
 #define _buffer_hpp
 
-#include "../h/_sem.hpp"
+#include "_sem.hpp"
+#include "slab.hpp"
+
 #define BUFFER_SIZE 256
 
 class _buffer {
@@ -17,9 +19,11 @@ private:
     int head, tail, size;
 
 public:
-    void *operator new(size_t size) { return __mem_alloc(size); }
+    static kmem_cache_t *cachep;
 
-    void operator delete(void *ptr) { __mem_free(ptr); }
+    void *operator new(size_t size);
+
+    void operator delete(void *ptr);
 
     _buffer();
 

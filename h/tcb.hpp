@@ -7,6 +7,8 @@
 
 #include "../lib/hw.h"
 #include "scheduler.hpp"
+#include "_stack.hpp"
+#include "slab.hpp"
 
 // Thread Control Block
 class TCB
@@ -23,7 +25,7 @@ public:
         IDLE
     };
 
-    ~TCB() { delete[] stack; }
+    ~TCB() { delete (_stack*)stack; }
 
     bool isFinished() const { return status == FINISHED; }
 
@@ -57,9 +59,11 @@ public:
 
     int start();
 
-    void *operator new(size_t size) { return __mem_alloc(size); }
+    static kmem_cache_t *cachep;
 
-    void operator delete(void *ptr) { __mem_free(ptr); }
+    void *operator new(size_t size);
+
+    void operator delete(void *ptr);
 
 private:
     // ako je body == nullptr, nit u pitanju je main nit. samim tim automatski je RUNNING. isto tako kontekst/stek su joj null

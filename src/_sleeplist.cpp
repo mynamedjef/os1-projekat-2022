@@ -10,6 +10,8 @@ time_t _sleeplist::passed = 0;
 
 time_t _sleeplist::total_passed = 0;
 
+kmem_cache_t *SleepNode::cachep = nullptr;
+
 void _sleeplist::insert(SleepNode *data)
 {
     Elem *head = Sleeping.head;

@@ -72,12 +72,13 @@ uint64 Riscv::syscall(uint64 *args)
     if (opcode == MEM_ALLOC)
     {
         size_t volatile size = args[1] * MEM_BLOCK_SIZE;
-        retval = (uint64)__mem_alloc(size);
+        retval = (uint64)kmalloc(size);
     }
     else if (opcode == MEM_FREE)
     {
         void *ptr = (void*)args[1];
-        retval = (uint64)__mem_free(ptr);
+        kfree(ptr);
+        retval = 0;
     }
     else if (opcode == THREAD_DISPATCH)
     {

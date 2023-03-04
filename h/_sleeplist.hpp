@@ -6,14 +6,28 @@
 #define __sleeplist_hpp
 
 #include "tcb.hpp"
+#include "slab.hpp"
 
 struct SleepNode {
     TCB *tcb;
     time_t timeout;
     SleepNode(TCB *_tcb, time_t _timeout) : tcb(_tcb), timeout(_timeout) { }
+
+    static kmem_cache_t *cachep;
     
-    void *operator new(size_t size) { return __mem_alloc(size); }
-    void operator delete(void *ptr) { __mem_free(ptr); }
+    void *operator new(size_t size)
+    {
+        if (cachep == nullptr)
+        {
+            cachep = kmem_cache_create("SLPNODE\0", sizeof(SleepNode), nullptr, nullptr);
+        }
+        return kmem_cache_alloc(cachep);
+    }
+
+    void operator delete(void *ptr)
+    {
+        kmem_cache_free(cachep, ptr);
+    }
 };
 
 class _sleeplist : public List<SleepNode> {

@@ -6,7 +6,6 @@
 #include "../test/printing.hpp"
 #include "../h/riscv.hpp"
 #include "../h/_sleeplist.hpp"
-#include "../h/MemoryAllocator.hpp"
 
 extern void userMain();
 
@@ -20,7 +19,8 @@ void user_wrapper(void *sem)
 
 int main()
 {
-    MemoryAllocator::init_memory();
+    kmem_init((void*)HEAP_START_ADDR, (void*)HEAP_END_ADDR);
+
     Riscv::init();
 
     TCB *kernel = TCB::kernelThread();

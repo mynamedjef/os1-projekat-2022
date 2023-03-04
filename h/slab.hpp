@@ -56,6 +56,8 @@ typedef struct kmem_cache_s
 
 void kmem_init(void *space, int block_num);
 
+void kmem_init(void *heap_start, void *heap_end);
+
 kmem_cache_t *kmem_cache_create(const char *name, size_t size,
                                     void (*ctor)(void*),
                                     void (*dtor)(void*)); // Allocate cache

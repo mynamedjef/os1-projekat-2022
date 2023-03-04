@@ -17,6 +17,24 @@ TCB *TCB::output = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
+kmem_cache_t *TCB::cachep = nullptr;
+
+kmem_cache_t *_stack::cachep = nullptr;
+
+void *TCB::operator new(size_t size)
+{
+    if (cachep == nullptr)
+    {
+        cachep = kmem_cache_create("TCB\0", sizeof(TCB), nullptr, nullptr);
+    }
+    return kmem_cache_alloc(cachep);
+}
+
+void TCB::operator delete(void *obj)
+{
+    kmem_cache_free(cachep, obj);
+}
+
 void console_out(void*)
 {
     while (true) {
@@ -59,7 +77,7 @@ TCB *TCB::kernelThread()
 TCB *TCB::idleThread()
 {
     if (!idle) {
-        uint64 *stack = (uint64*)__mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
+        uint64 *stack = (uint64*)(new _stack);
         idle = initThread(idleWrapper, nullptr, stack);
         idle->status = IDLE;
         idle->sys_thread = true;
@@ -70,7 +88,7 @@ TCB *TCB::idleThread()
 TCB *TCB::outputThread()
 {
     if (!output) {
-        uint64 *stack = (uint64*)__mem_alloc(sizeof(uint64) * DEFAULT_STACK_SIZE);
+        uint64 *stack = (uint64*)(new _stack);
         output = createThread(console_out, nullptr, stack);
         output->sys_thread = true;
     }

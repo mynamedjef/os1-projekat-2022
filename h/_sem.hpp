@@ -8,14 +8,17 @@
 #include "syscall_c.h"
 #include "list.hpp"
 #include "tcb.hpp"
+#include "slab.hpp"
 
 class _sem {
 public:
+    static kmem_cache_t *cachep;
+
     ~_sem();
 
-    void *operator new(size_t size) { return __mem_alloc(size); }
+    void *operator new(size_t size);
 
-    void operator delete(void *ptr) { __mem_free(ptr); }
+    void operator delete(void *ptr);
 
 private:
     List<TCB> waiting;
