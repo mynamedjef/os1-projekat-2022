@@ -15,6 +15,10 @@ uint8 *buddy::base_ptr = nullptr;
 
 uint8 *buddy::end_ptr = nullptr;
 
+alloc_info buddy::allocd = {0, 0};
+
+alloc_info buddy::deallocd = {0, 0};
+
 /*
 * Postavlja početno stanje alokatora.
 * Poravnava početak i kraj heap-a na veličinu bloka i
@@ -145,6 +149,9 @@ void *buddy::buddy_alloc(size_t size)
         height = tree_height-1;  // u slučaju da nismo našli u trenutnom stablu, moramo da ga povećamo
     }
 
+    allocd.bytes += size;
+    allocd.times++;
+
     uint64 idx = get_idx(ptr, bucket);
     flip_is_used(idx, ALLOCD);  // alociran čvor se označava kao korišćen
     return (void*)ptr;
@@ -190,13 +197,16 @@ int buddy::buddy_free(void *loc, size_t size)
         return 1;
     }
 
-    uint bucket = get_bucket(size);
+    int bucket = get_bucket(size);
     uint64 idx = get_idx(loc, bucket);
 
     if (is_used[idx] != ALLOCD)
     {
         return 2;
     }
+
+    deallocd.bytes += size;
+    deallocd.times++;
 
     while (true)
     {
@@ -209,7 +219,7 @@ int buddy::buddy_free(void *loc, size_t size)
         *  u slučaju da smo stigli do vrha stabla, ili da naš parnjak nije slobodan,
         *  upisujemo oslobođen segment u listu slobodnih i uspešno završavamo oslobađanje
         */
-        if (bucket == 0 || is_used[buddy_idx] != FREE)
+        if (bucket == tree_height || is_used[buddy_idx] != FREE)
         {
             list_push(&free_list[bucket], (list_t*)loc);
             return 0;
@@ -322,8 +332,9 @@ void buddy::print_tree()
 */
 void buddy::print()
 {
-    print_tree();
-    putc('\n');
+    // print_tree(); putc('\n');
+    printString("Allocated: "); printInt(allocd.bytes); printString("B (x"); printInt(allocd.times); printString(")\n");
+    printString("Deallocated: "); printInt(deallocd.bytes); printString("B (x"); printInt(deallocd.times); printString(")\n");
     for (int i = 0; i < BUCKET_COUNT; i++)
     {
         if (free_list[i] == nullptr) { continue; }

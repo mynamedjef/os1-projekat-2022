@@ -8,7 +8,7 @@
 #include "../h/list_t.hpp"
 #include "../lib/hw.h"
 
-#define MIN_ALLOC_LOG2 5  // treba da bude sizeof(list_t) = 2*8 = 2^4
+#define MIN_ALLOC_LOG2 5  // treba da bude najmanje sizeof(list_t) = 2*8 = 2^4
 #define MIN_ALLOC ((size_t)1 << MIN_ALLOC_LOG2)
 
 #define MAX_ALLOC_LOG2 26  // treba da bude 2^26
@@ -20,6 +20,12 @@
 #define LCHILD(idx) ((idx) * 2) + 1
 #define RCHILD(idx) ((idx) * 2) + 2
 #define SIBLING(idx) (((idx) - 1) ^ 1) + 1
+
+struct alloc_info
+{
+    size_t bytes;
+    uint times;
+};
 
 
 class buddy
@@ -34,6 +40,10 @@ public:
     static int buddy_free_recursive(void*, size_t);
 
     static void print();
+
+    static alloc_info allocd;
+
+    static alloc_info deallocd;
 
 private:
     enum Status {
