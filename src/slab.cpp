@@ -22,7 +22,7 @@ static kmem_cache_t *buffers[BUFFER_COUNT] = {0};
 */
 inline uint max_objects(kmem_cache_t *cachep)
 {
-    return (cachep->slab_size - sizeof(kmem_slab_t)) / cachep->obj_size;
+    return cachep->slab_size / cachep->obj_size;
 }
 
 // ================ slab-ovi =================
@@ -30,10 +30,10 @@ inline uint max_objects(kmem_cache_t *cachep)
 * Zaokružuje veličinu "size" na prvi stepen dvojke
 * koji je veći ili jednak BLOCK_SIZE
 */
-inline uint64 slab_size(uint64 size)
+inline size_t get_slab_size(uint64 size)
 {
     // alternativa: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-    uint64 block_size = BLOCK_SIZE;
+    size_t block_size = BLOCK_SIZE;
     while (block_size < size)
     {
         block_size <<= 1;
@@ -52,18 +52,26 @@ kmem_slab_t *slab_init(kmem_cache_t *cache)
         return nullptr;
     }
 
-    kmem_slab_t *slab = (kmem_slab_t*)buddy::buddy_alloc(cache->slab_size);
+    kmem_slab_t *slab = (kmem_slab_t*)buddy::buddy_alloc(sizeof(kmem_slab_t));
     if (slab == nullptr)
     {
+        return nullptr;
+    }
+
+    list_t *file = (list_t*)buddy::buddy_alloc(cache->slab_size);
+    if (file == nullptr)
+    {
+        buddy::buddy_free(slab, sizeof(kmem_slab_t));
         return nullptr;
     }
 
     slab->count = 0;
     slab->next = slab->prev = nullptr;
 
-    uint8 *base = ((uint8*)slab + sizeof(kmem_slab_t));
-    list_t *ptr = (list_t*)base;
-    slab->free = ptr;
+    uint8 *base = (uint8*)file;
+    list_t *ptr = file;
+    slab->free = file;
+    slab->file = file;
 
     list_t *prev = nullptr;
 
@@ -127,7 +135,7 @@ kmem_cache_t *kmem_cache_create(const char *name, size_t obj_size,
     cache->dtor = dtor;
     cache->obj_size = obj_size;
     // alociranje prostora za ploču (veličina ploče + veličina objekta * minimum objekata po ploči)
-    cache->slab_size = slab_size(sizeof(kmem_slab_t) + (obj_size << OBJECTS_PER_SLAB_LOG2));
+    cache->slab_size = get_slab_size(obj_size << OBJECTS_PER_SLAB_LOG2);
 
     all_caches[cache_id++] = cache;
     return cache;
@@ -147,8 +155,9 @@ int kmem_cache_shrink(kmem_cache_t *cachep)
     int status = 0;
     while (cachep->empty != nullptr && status == 0)
     {
-        list_t *ret = list_pop((list_t**)&(cachep->empty));
-        status = buddy::buddy_free(ret, cachep->slab_size);
+        kmem_slab_t *curr = (kmem_slab_t*)list_pop((list_t**)&(cachep->empty));
+        status |= buddy::buddy_free(curr->file, cachep->slab_size);
+        status |= buddy::buddy_free(curr, sizeof(kmem_slab_t));
         freed_slabs++;
     }
     return (freed_slabs * cachep->slab_size) >> BLOCK_SIZE_LOG2;
@@ -214,8 +223,8 @@ kmem_slab_t *find_slab(kmem_slab_t *slab, void *objp, uint64 slab_size)
     uint8 *loc = (uint8*)objp;
     for (kmem_slab_t *curr = slab; curr; curr = curr->next)
     {
-        uint8 *slab_start = (uint8*)curr;
-        uint8 *slab_end = (uint8*)curr + slab_size;
+        uint8 *slab_start = (uint8*)curr->file;
+        uint8 *slab_end = slab_start + slab_size;
         if (loc >= slab_start && loc < slab_end)
         {
             return curr;
@@ -344,16 +353,17 @@ void kmem_cache_destroy(kmem_cache_t *cachep)
     kmem_slab_t *slabs[N] = {cachep->empty, cachep->mixed, cachep->full};
     for (int i = 0; i < N; i++)
     {
-        list_t *curr = (list_t*)slabs[i];
-        list_t *next = nullptr;
+        kmem_slab_t *curr = slabs[i];
+        kmem_slab_t *next = nullptr;
         while (curr)
         {
             next = curr->next;
-            buddy::buddy_free((void*)curr, cachep->slab_size);
+            buddy::buddy_free(curr->file, cachep->slab_size);
+            buddy::buddy_free(curr, sizeof(kmem_slab_t));
             curr = next;
         }
     }
-    buddy::buddy_free((void*)cachep, sizeof(kmem_cache_t));
+    buddy::buddy_free(cachep, sizeof(kmem_cache_t));
 }
 
 /*

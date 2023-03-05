@@ -38,6 +38,7 @@ typedef struct kmem_slab_s
     kmem_slab_s *next;
     kmem_slab_s *prev;
     list_t *free;
+    list_t *file; // fajl memorije
     uint count;
 } kmem_slab_t;
 
