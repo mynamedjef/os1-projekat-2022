@@ -32,9 +32,13 @@ inline uint max_objects(kmem_cache_t *cachep)
 */
 inline uint64 slab_size(uint64 size)
 {
-    return ((size & (BLOCK_SIZE - 1)) == 0) ?
-        size :
-        ((size >> BLOCK_SIZE_LOG2) + 1) << BLOCK_SIZE_LOG2;
+    // alternativa: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+    uint64 block_size = BLOCK_SIZE;
+    while (block_size < size)
+    {
+        block_size <<= 1;
+    }
+    return block_size;
 }
 
 /*
