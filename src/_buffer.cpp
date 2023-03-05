@@ -4,20 +4,14 @@
 
 #include "../h/_buffer.hpp"
 
-kmem_cache_t *_buffer::cachep = nullptr;
-
 void *_buffer::operator new(size_t size)
 {
-    if (cachep == nullptr)
-    {
-        cachep = kmem_cache_create("IO-BFFR\0", sizeof(_buffer), nullptr, nullptr);
-    }
-    return kmem_cache_alloc(cachep);
+    return kmalloc(size);
 }
 
 void _buffer::operator delete(void *obj)
 {
-    kmem_cache_free(cachep, obj);
+    kfree(obj);
 }
 
 _buffer::_buffer() : head(0), tail(0), size(0)

@@ -291,7 +291,7 @@ void *kmalloc(size_t size)
         name_buf[i++] = (log2 % 10) + '0';
         name_buf[i] = '\0';
         // kreiranje bafera
-        buffers[idx] = kmem_cache_create(name_buf, gross, nullptr, nullptr);
+        buffers[idx] = kmem_cache_create(name_buf, (size_t)1 << log2, nullptr, nullptr);
     }
 
     uint8 *ret = (uint8*)kmem_cache_alloc(buffers[idx]);

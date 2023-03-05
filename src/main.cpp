@@ -54,7 +54,6 @@ int main()
     kmem_buffers_destroy();
     kmem_cache_destroy(SleepNode::cachep);
     kmem_cache_destroy(_sem::cachep);
-    kmem_cache_destroy(_buffer::cachep);
     kmem_cache_destroy(List<TCB>::cachep);
     kmem_cache_destroy(TCB::cachep);
     kmem_cache_destroy(_stack::cachep);

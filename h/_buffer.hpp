@@ -8,7 +8,18 @@
 #include "_sem.hpp"
 #include "slab.hpp"
 
-#define BUFFER_SIZE 256
+/*
+* Veličina char buffer-a u bajtovima.
+* Ideja je da sizeof(_buffer) stane tačno u jedan mali memorijski bafer
+* tj. da idealno sizeof(_buffer) bude jednak stepenu dvojke 2^n.
+* Sobzirom da su strukture poravnate na 8 bajtova, a kmalloc ima dodatno
+* zaglavlje od jednog bajta, veličina sizeof(_buffer) ne sme biti veća od (2^n - 8).
+* Onda od te veličine oduzimamo veličine ostalih polja
+* da dobijemo veličinu char buffer-a: (2^n - 8 - 4*sizeof(sem_t) - 3*sizeof(int)).
+*
+* Da bi važilo BUFFER_SIZE => 0, mora da važi 2^n >= 64. U trenutnoj impl. uzeto (2^n = 256)
+*/
+#define BUFFER_SIZE ((256 - 8) - 4*sizeof(sem_t) - 3*sizeof(int))
 
 class _buffer {
 private:
@@ -19,8 +30,6 @@ private:
     int head, tail, size;
 
 public:
-    static kmem_cache_t *cachep;
-
     void *operator new(size_t size);
 
     void operator delete(void *ptr);
