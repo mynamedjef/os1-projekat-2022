@@ -7,6 +7,8 @@
 #include "../h/riscv.hpp"
 #include "../h/_sleeplist.hpp"
 
+extern void os2_usermain2(); // pošto se pokreće u sistemskom modu
+
 extern void userMain();
 
 void user_wrapper(void *sem)
