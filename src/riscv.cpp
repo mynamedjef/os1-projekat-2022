@@ -84,16 +84,16 @@ uint64 Riscv::syscall(uint64 *args)
     {
         TCB::dispatch();
     }
+    else if (opcode == STACK_ALLOC)
+    {
+        retval = (uint64)TCB::alloc_stack();
+    }
     else if (opcode == THREAD_CREATE || opcode == THREAD_PREPARE)
     {
         thread_t *handle = (thread_t*)args[1];
         Body routine     = (Body)args[2];
         void *arg        = (void*)args[3];
-        uint64 *stack    = (uint64*)(new _stack);
-        if (stack == nullptr)
-        {
-            return 1;
-        }
+        uint64 *stack    = (uint64*)args[4];
 
         *handle = TCB::initThread(routine, arg, stack);
         if (opcode == THREAD_CREATE) { retval = (*handle)->start(); }

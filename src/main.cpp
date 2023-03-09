@@ -58,7 +58,7 @@ int main()
     kmem_cache_destroy(_sem::cachep);
     kmem_cache_destroy(List<TCB>::cachep);
     kmem_cache_destroy(TCB::cachep);
-    kmem_cache_destroy(_stack::cachep);
+    kmem_cache_destroy(TCB::stack_cachep);
 
     return 0;
 }

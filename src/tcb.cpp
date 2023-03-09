@@ -19,7 +19,17 @@ uint64 TCB::timeSliceCounter = 0;
 
 kmem_cache_t *TCB::cachep = nullptr;
 
-kmem_cache_t *_stack::cachep = nullptr;
+kmem_cache_t *TCB::stack_cachep = nullptr;
+
+uint64 *TCB::alloc_stack()
+{
+    static const size_t STACK_SIZE_BYTES = sizeof(uint64) * DEFAULT_STACK_SIZE;
+    if (stack_cachep == nullptr)
+    {
+        stack_cachep = kmem_cache_create("TCB-STK\0", STACK_SIZE_BYTES, nullptr, nullptr);
+    }
+    return (uint64*)kmem_cache_alloc(stack_cachep);
+}
 
 void *TCB::operator new(size_t size)
 {
@@ -77,7 +87,7 @@ TCB *TCB::kernelThread()
 TCB *TCB::idleThread()
 {
     if (!idle) {
-        uint64 *stack = (uint64*)(new _stack);
+        uint64 *stack = alloc_stack();
         idle = initThread(idleWrapper, nullptr, stack);
         idle->status = IDLE;
         idle->sys_thread = true;
@@ -88,7 +98,7 @@ TCB *TCB::idleThread()
 TCB *TCB::outputThread()
 {
     if (!output) {
-        uint64 *stack = (uint64*)(new _stack);
+        uint64 *stack = alloc_stack();
         output = createThread(console_out, nullptr, stack);
         output->sys_thread = true;
     }

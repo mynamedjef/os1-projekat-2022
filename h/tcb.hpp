@@ -7,7 +7,6 @@
 
 #include "../lib/hw.h"
 #include "scheduler.hpp"
-#include "_stack.hpp"
 #include "slab.hpp"
 
 // Thread Control Block
@@ -25,7 +24,7 @@ public:
         IDLE
     };
 
-    ~TCB() { delete (_stack*)stack; }
+    ~TCB() { kmem_cache_free(stack_cachep, stack); }
 
     bool isFinished() const { return status == FINISHED; }
 
@@ -60,6 +59,8 @@ public:
     int start();
 
     static kmem_cache_t *cachep;
+
+    static kmem_cache_t *stack_cachep;
 
     void *operator new(size_t size);
 
@@ -132,6 +133,8 @@ private:
     void ready();
 
     static void idleWrapper(void*);
+
+    static uint64 *alloc_stack();
 
     static uint64 timeSliceCounter;
 };

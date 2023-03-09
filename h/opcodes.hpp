@@ -14,6 +14,7 @@ enum Opcodes: uint64 {
     THREAD_PREPARE  = 0x14,
     THREAD_START    = 0x15,
     THREAD_DELETE   = 0x16,
+    STACK_ALLOC     = 0x17,
     SEM_OPEN        = 0x21,
     SEM_CLOSE       = 0x22,
     SEM_WAIT        = 0x23,
