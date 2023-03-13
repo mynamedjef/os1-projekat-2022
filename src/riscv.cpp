@@ -111,7 +111,6 @@ uint64 Riscv::syscall(uint64 *args)
     else if (opcode == THREAD_DELETE)
     {
         thread_t handle = (thread_t)args[1];
-        while (!handle->isFinished()) { TCB::dispatch(); }
         delete handle;
     }
     else if (opcode == SEM_OPEN)
