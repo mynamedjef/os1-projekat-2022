@@ -25,6 +25,8 @@ public:
     static void put(TCB*);
 
     static int size();
+
+    static void flush_user_threads();
 };
 
 #endif //_scheduler_hpp
