@@ -28,7 +28,7 @@ const char * const CACHE_NAMES[] = {"tc_0",
 
 void memset(const void *data, int size, int value) {
     for (int j = 0; j < size; j++) {
-        *(char *)data = value;
+        ((char*)data)[j] = value;
     }
 }
 
