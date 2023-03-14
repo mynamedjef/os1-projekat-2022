@@ -15,7 +15,9 @@ int stringToInt(const char *s);
 
 void printInt(int xx, int base=10, int sgn=0);
 
-void printHexa(uint64 xx, bool trim=true);
+void printHexa(uint64 xx, uint padding=0);
+
+void hexDump(char *desc, void *addr, int len);
 
 #endif // _PRINTING_HPP_
 
