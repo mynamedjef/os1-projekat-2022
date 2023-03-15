@@ -76,20 +76,11 @@ bool buddy::grow_tree(int target)
     }
 
     /*
-    * Koren prethodnog stabla nije slobodan.
-    * Dok ne stignemo do ciljne visine stabla radimo sledeće:
-    * 1. Povećavamo stablo
-    * 2. Novi koren označavamo kao podeljen (jer mu je levo dete, dosadašnji koren, nije slobodno)
-    * 3. Desno dete dodajemo u slobodnu listu nivoa ispod novog korena.
+    * Koren prethodnog stabla nije slobodan, pa postaje dete novog korena (koji je automatski podeljen).
+    * Ostalu decu novog korena ubacujemo u listu slobodnih, i postavljamo visinu stabla na 'target'.
     */
-    while (target < tree_height)
-    {
-        tree_height--;
-        uint64 idx = get_idx((void*)base_ptr, tree_height);
-        flip_is_used(idx, SPLIT);
-        uint8 *ptr = get_ptr(RCHILD(idx), tree_height + 1);
-        list_push(&free_list[tree_height + 1], (list_t*)ptr);
-    }
+    split(base_ptr, target, tree_height);
+    tree_height = target;
 
     return true;
 }
@@ -142,7 +133,8 @@ void *buddy::buddy_alloc(size_t size)
             if (free_list[i] != nullptr)
             {
                 // ako je pronađeno parče memorije veće od traženog, delimo ga na više parčića
-                ptr = (list_t*)split_until_available(bucket, i);
+                ptr = list_pop(&free_list[i]);
+                split(ptr, i, bucket);
                 break;
             }
         }
@@ -158,30 +150,26 @@ void *buddy::buddy_alloc(size_t size)
 }
 
 /*
-* Delimo veće parče memorije sve dok ne dobijemo parče koje smo tražili,
-* na kraju čega vraćamo traženo parče.
-*/
-list_t *buddy::split_until_available(int target, int curr)
+ * Delimo veće parče memorije (nivoa 'splitting_level') sve dok ne dobijemo parče
+ * na nivou koji tražimo ('target_level').
+ */
+void buddy::split(void *loc, int splitting_level, int target_level)
 {
-    list_t *ret = list_pop(&free_list[curr]);
     /*
-    * Dok god nismo stigli do traženog nivoa radimo sledeće:
-    * 1. Označavamo čvor kao podeljen
-    * 2. Desno dete dodajemo u listu slobodnih
-    * 3. Levo dete nastavljamo da delimo
-    *
-    * Provera za (ret != nullptr) nije potrebna jer se split poziva samo u slučaju da je (free_list[curr] != nullptr)
-    */
-    while (target > curr && ret)
+     * Dok god nismo podelili čvorove do traženog nivoa radimo sledeće:
+     * 1. Označavamo čvor sa lokacije 'loc' i nivoa 'splitting_level' kao podeljen;
+     * 2. Njegovo desno dete dodajemo u listu slobodnih;
+     * 3. Levo dete nastavljamo da delimo istim procesom.
+     */
+    while (splitting_level < target_level)
     {
-        uint64 idx = get_idx((void*)ret, curr);
+        uint64 idx = get_idx(loc, splitting_level);
         flip_is_used(idx, SPLIT);
-        uint8 *rchild = get_ptr(RCHILD(idx), curr + 1);
-        list_push(&free_list[curr + 1], (list_t*)rchild);
+        uint8 *rchild = get_ptr(RCHILD(idx), splitting_level+1);
+        list_push(&free_list[splitting_level+1], (list_t*)rchild);
 
-        curr++;
+        splitting_level++;
     }
-    return ret;
 }
 
 /*

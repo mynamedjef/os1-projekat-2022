@@ -71,7 +71,7 @@ private:
 
     static void flip_is_used(uint64, Status);
 
-    static list_t *split_until_available(int, int);
+    static void split(void*, int, int);
 
     static uint64 get_idx(void *ptr, uint bucket);
 
