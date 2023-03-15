@@ -22,15 +22,11 @@ class _sleeplist : public List<SleepNode> {
 public:
     _sleeplist() : passed(0), total_passed(0) { }
 
-    void insert(SleepNode *s);
-
     void insert(TCB *tcb, time_t timeout);
 
     void tick();
 
 private:
-    bool Comparator(SleepNode *t1, SleepNode *t2) { return t1->timeout < t2->timeout; }
-
     TCB *pop();
 
     time_t passed;
@@ -38,6 +34,9 @@ private:
     time_t total_passed;
 
     bool ready();
+
+    static bool Comparator(SleepNode *t1, SleepNode *t2) { return t1->timeout < t2->timeout; }
+
 };
 
 #endif //__sleeplist_hpp

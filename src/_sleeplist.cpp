@@ -4,29 +4,9 @@
 
 #include "../h/_sleeplist.hpp"
 
-void _sleeplist::insert(SleepNode *data)
-{
-    if (!head || Comparator(data, head->data))
-    {
-        addFirst(data);
-    }
-    else
-    {
-        Elem *prev = head;
-        for (Elem *curr = head->next; curr; curr = curr->next) {
-            if (Comparator(data, curr->data)) {
-                insertAfter(prev, data);
-                return;
-            }
-            prev = curr;
-        }
-        addLast(data);
-    }
-}
-
 void _sleeplist::insert(TCB *tcb, time_t timeout)
 {
-    insert(new SleepNode(tcb, timeout + passed));
+    priorityInsert(new SleepNode(tcb, timeout + passed), Comparator);
 }
 
 TCB *_sleeplist::pop()
