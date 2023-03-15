@@ -16,9 +16,8 @@ alloc_info MemoryAllocator::allocd = {0, 0};
 
 alloc_info MemoryAllocator::deallocd = {0, 0};
 
-uint64 MemoryAllocator::offset = 0;  // isključivo za debagovanje
-
 void MemoryAllocator::init_memory() {
+    const uint64 offset = 0;  // isključivo za debagovanje
     base_ptr = (uint8*)HEAP_START_ADDR + offset;
     end_ptr = (uint8*)HEAP_END_ADDR;
 

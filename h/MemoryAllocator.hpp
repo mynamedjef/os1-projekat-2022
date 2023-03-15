@@ -18,9 +18,9 @@ class MemoryAllocator {
 public:
     static MemDescr *free, *occupied;
 
-    static alloc_info allocd;
+    static alloc_info allocd;   // Čuva info o koliko alokacija se desilo i njihove veličine (za debagovanje)
 
-    static alloc_info deallocd;
+    static alloc_info deallocd; // Čuva info o koliko dealokacija se desilo i njihove veličine (za debagovanje)
 
     static void *alloc(size_t);
 
@@ -29,8 +29,6 @@ public:
     static void init_memory();
 
 private:
-    static uint64 offset;
-
     static uint8 *base_ptr;
 
     static uint8 *end_ptr;
