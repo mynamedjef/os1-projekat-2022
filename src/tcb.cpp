@@ -17,19 +17,21 @@ TCB *TCB::output = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
+// telo funkcije koje izvršava izlazna nit.
 void console_out(void*)
 {
     while (true) {
-        volatile char status = *((char *) CONSOLE_STATUS);
+        volatile char status = *((char*)CONSOLE_STATUS);
         while ((status & CONSOLE_TX_STATUS_BIT)) {
             char c = Riscv::bufout->get();
             *((char*)CONSOLE_TX_DATA) = c;
-            status = *((char*) CONSOLE_STATUS);
+            status = *((char*)CONSOLE_STATUS);
         }
     }
 }
 
-void TCB::idleWrapper(void*)
+// telo funkcije koje izvršava besposlena nit.
+void idleWrapper(void*)
 {
     while (true) { thread_dispatch(); }
 }
@@ -119,7 +121,7 @@ void TCB::dispatch()
 {
     timeSliceCounter = 0;
     TCB *old = running;
-    if (old->status == RUNNING) {
+    if (old->status == RUNNING) { // vraćamo nit u scheduler ako nije završila posao
         old->ready();
     }
 
@@ -127,19 +129,19 @@ void TCB::dispatch()
     if (running) {
         running->status = RUNNING;
     } else {
-        running = idle;
+        running = idle; // ako nema niti u scheduleru, uzimamo besposlenu nit
     }
 
-    Riscv::restorePrivilege();
+    Riscv::restorePrivilege(); // restauriramo adekvatnu privilegiju niti na koju se vraćamo
     TCB::contextSwitch(&old->context, &running->context);
 }
 
 void TCB::threadWrapper()
 {
-    Riscv::restorePrivilege();
-    Riscv::popSppSpie();
-    running->body(running->arg);
-    thread_exit();
+    Riscv::restorePrivilege();   // definiše u koji režim se vraćamo po izlasku iz prekidne rutine
+    Riscv::popSppSpie();         // izlazak iz prekidne rutine
+    running->body(running->arg); // van prekidne rutine smo - možemo da izvršavamo telo funkcije
+    thread_exit();               // označavamo nit kao završenu i radimo dispatch jer nemamo gde da se vratimo
 }
 
 int TCB::sleep(time_t timeout)

@@ -20,7 +20,6 @@ _buffer::~_buffer()
     delete available;
 }
 
-// get() koji se koristi samo tokom prekidne rutine (kernel kod)
 char _buffer::kernel_get()
 {
     available->wait();
@@ -36,7 +35,6 @@ char _buffer::kernel_get()
     return ret;
 }
 
-// get() koji se koristi u korisničkim funkcijama
 char _buffer::get()
 {
     sem_wait(available);

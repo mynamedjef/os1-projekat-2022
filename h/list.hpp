@@ -21,7 +21,7 @@ protected:
         void operator delete(void *ptr) { __mem_free(ptr); }
     };
 
-    // ubacuje element data posle elementa node. ako je node null, ne radi ništa.
+    // Ubacuje element data posle elementa node. ako je node null, ne radi ništa.
     void insertAfter(Elem *node, T *data);
 
 private:
@@ -44,14 +44,14 @@ public:
 
     T *removeFirst();
 
-    T *peekFirst();
+    T *peekFirst() const;
 
     T *removeLast();
 
-    T *peekLast();
+    T *peekLast() const;
 
     /*
-     * Ubacuje element na koji pokazuje 'data' u listu.
+     * U listu ubacuje element na koji pokazuje 'data'.
      * Pozicija ubacivanja zavisi od funkcije za poređenje comparator(), koja treba
      * da vraća 'true' ako element na koji pokazuje 't1' u listi treba da ide pre elementa na koji pokazuje 't2'.
      */
@@ -107,7 +107,7 @@ T *List<T>::removeFirst()
 }
 
 template<typename T>
-T *List<T>::peekFirst()
+T *List<T>::peekFirst() const
 {
     if (!head) { return 0; }
     return head->data;
@@ -136,7 +136,7 @@ T *List<T>::removeLast()
 }
 
 template<typename T>
-T *List<T>::peekLast()
+T *List<T>::peekLast() const
 {
     if (!tail) { return 0; }
     return tail->data;

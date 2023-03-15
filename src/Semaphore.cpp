@@ -6,6 +6,7 @@
 
 Semaphore::Semaphore(unsigned init)
 {
+    myHandle = nullptr;
     sem_open(&myHandle, init);
 }
 

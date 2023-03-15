@@ -81,26 +81,28 @@ public:
     // supervisor trap
     static void supervisorTrap();
 
-    static void restorePrivilege();
+    static void restorePrivilege(); // Restaurira ispravne privilegije nakon povratka iz prekidne rutine.
 
-    static _buffer *bufin, *bufout;
+    static _buffer *bufin, *bufout; // Ulazni i izlazni baferi.
 
-    static void init();
+    static void init(); // Inicijalizacija bafera za ulaz i izlaz.
 
-    static _sleeplist sleeplist;
+    static _sleeplist sleeplist; // Lista uspavanih niti
 
 private:
+    static void w_retval(uint64); // upis u registar a0 (preko koga se prenosi povratna vrednost sis. poziva)
 
-    static void w_retval(uint64);
+    static void handleSupervisorTrap(); // funkcija kojom obrađujemo sve prekide
 
-    // supervisor trap handler
-    static void handleSupervisorTrap();
+    static void handleTimer(); // obrada prekidne rutine prouzrukovane tajmerom
 
-    static void unexpectedTrap();
+    static void handleHardware(); // obrada prekidne rutine prouzrokovane tastaturom
 
-    static void loadParams(uint64*);
+    static void handleUnexpectedTrap(); // obrada prekidne rutine prouzrokovane izuzetkom
 
-    static uint64 syscall(uint64*);
+    static void loadParams(uint64*); // učitavanje parametara sistemskog poziva u niz
+
+    static uint64 syscall(uint64*); // izvršavanje sistemskog poziva (parametri su prosleđeni nizom)
 
 };
 

@@ -31,7 +31,7 @@ void _sleeplist::tick()
     }
 }
 
-bool _sleeplist::ready()
+bool _sleeplist::ready() const
 {
     return (size() > 0 && peekFirst()->timeout <= passed);
 }

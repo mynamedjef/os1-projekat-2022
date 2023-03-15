@@ -28,11 +28,11 @@ public:
         __mem_free(stack);
     }
 
-    bool isFinished() const { return status == FINISHED; }
+    bool isFinished() const { return status == FINISHED; } // da li je nit završena
 
-    bool is_systhread() const { return sys_thread; }
+    bool is_systhread() const { return sys_thread; } // da li je nit sistemska (a ne korisnička)
 
-    void setStatus(Status st) { status = st; }
+    void setStatus(Status st) { status = st; } // postavlja status niti
 
     uint64 getTimeSlice() const { return timeSlice; }
 
@@ -44,20 +44,31 @@ public:
     // pravi nit koja čeka da bude pokrenuta sa .start()
     static TCB *initThread(Body, void*, uint64*);
 
+    // dohvata unikatnu besposlenu nit koja radi samo kada nema ni jedne druge niti u scheduleru
     static TCB *idleThread();
 
+    // dohvata unikatnu "glavnu" nit koja predstavlja glavni tok kontrole main()
     static TCB *kernelThread();
 
+    // dohvata unikatnu nit za ispis na ekran
     static TCB *outputThread();
 
+    // trenutna nit
     static TCB *running;
 
+    // "glavna" nit
     static TCB *kernel;
 
+    // besposlena nit
     static TCB *idle;
 
+    // nit za ispis
     static TCB *output;
 
+    // broji koliko je vremena prošlo
+    static uint64 timeSliceCounter;
+
+    // započinje kreiranu nit
     int start();
 
     void *operator new(size_t size) { return __mem_alloc(size); }
@@ -93,15 +104,15 @@ private:
         uint64 sp;
     };
 
-    Body body;
-    void *arg;
-    uint64 *stack;
-    Context context;
-    uint64 timeSlice;
-    Status status;
-    bool sys_thread;
+    Body body;          // telo funkcije koju nit izvršava
+    void *arg;          // argument funkcije koju nit izvršava
+    uint64 *stack;      // stek niti
+    Context context;    // kontekst da bi nit mogla da se vrati
+    uint64 timeSlice;   // koliko vremena se već izvršava nit
+    Status status;      // stanje niti
+    bool sys_thread;    // da li je nit sistemska ili korisnička
 
-    TCB *next;  // potrebno za scheduler
+    TCB *next;          // potrebno za scheduler
 
     friend class Riscv;
 
@@ -111,10 +122,12 @@ private:
 
     friend class _sleeplist;
 
+    // Omotač oko tela svake niti koji postavlja kontekst pri startovanju gašenju niti.
     static void threadWrapper();
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
 
+    // Prebacujemo se na sledeću nit iz schedulera. Ako nema niti, uzimamo besposlenu nit.
     static void dispatch();
 
     // gasi trenutnu nit
@@ -128,16 +141,12 @@ private:
 
     // uspavljuje trenutnu nit na time_t otkucaja tajmera
     static int sleep(time_t);
-    
+
     // budi nit
     int wake();
 
     // ubacuje nit u scheduler tj. sprema je za rad
     void ready();
-
-    static void idleWrapper(void*);
-
-    static uint64 timeSliceCounter;
 };
 
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_TCB_HPP

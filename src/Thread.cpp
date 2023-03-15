@@ -6,13 +6,11 @@
 
 Thread::Thread(void (*body)(void*), void *arg)
 {
+    myHandle = nullptr;
     thread_prepare(&myHandle, body, arg);
 }
 
-Thread::Thread()
-{
-    thread_prepare(&myHandle, Thread::wrapper, this);
-}
+Thread::Thread() : Thread(Thread::wrapper, this) { }
 
 Thread::~Thread()
 {

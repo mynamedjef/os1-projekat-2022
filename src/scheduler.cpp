@@ -41,9 +41,6 @@ int Scheduler::size()
     return count;
 }
 
-/*
- * Izbacuje sve niti koje je korisnik napravio iz scheduler-a, efektivno ih gaseći nasilno
- */
 void Scheduler::flush_user_threads()
 {
     TCB *sentinel = TCB::initThread(nullptr, nullptr, nullptr);
@@ -57,4 +54,5 @@ void Scheduler::flush_user_threads()
             put(curr);
         }
     }
+    delete sentinel;
 }

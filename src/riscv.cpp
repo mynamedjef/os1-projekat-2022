@@ -19,12 +19,14 @@ void Riscv::init()
     bufout = new _buffer;
 }
 
+// Kada se nova nit napravi, i dalje smo u prekidnoj rutini. Pozivamo ovu funkciju da bi izašli iz pr. rutine.
 void Riscv::popSppSpie()
 {
     __asm__ volatile ("csrw sepc, ra");
     __asm__ volatile ("sret");
 }
 
+// Različiti tipovi prekida
 enum Interrupts: uint64 {
     SOFTWARE    = 0x8000000000000001UL,
     ECALL_SUPER = 0x0000000000000009UL,
@@ -32,6 +34,10 @@ enum Interrupts: uint64 {
     HARDWARE    = 0x8000000000000009UL
 };
 
+/*
+ * Ako je sistemska nit bila RUNNING pre prekidne rutine, vraćamo se u privilegovani režim po izlasku iz pr. rutine,
+ * a ako je korisnička nit bila RUNNING pre prekidne rutine, vraćamo se u neprivilegovani režim.
+ */
 void Riscv::restorePrivilege()
 {
     if (TCB::running->is_systhread()) {
@@ -41,7 +47,7 @@ void Riscv::restorePrivilege()
     }
 }
 
-inline void Riscv::unexpectedTrap()
+inline void Riscv::handleUnexpectedTrap()
 {
     uint64 scause = r_scause();
     uint64 stval = r_stval();
@@ -49,20 +55,51 @@ inline void Riscv::unexpectedTrap()
     uint64 sepc = r_sepc();
 
     printString("scause: ");
-    printInt(scause);
+    printHexa(scause);
     printString("\n");
 
     printString("stval: ");
-    printInt(stval);
+    printHexa(stval);
     printString("\n");
 
     printString("stvec: ");
-    printInt(stvec);
+    printHexa(stvec);
     printString("\n");
 
     printString("sepc: ");
-    printInt(sepc);
+    printHexa(sepc);
     printString("\n");
+}
+
+inline void Riscv::handleTimer()
+{
+    // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
+    TCB::timeSliceCounter++;
+    sleeplist.tick(); // proverava da li je vreme da se neke niti probude, i ako jeste budi ih
+    if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
+    {
+        uint64 sepc = r_sepc();
+        TCB::dispatch();
+        w_sepc(sepc);
+    }
+    mc_sip(SIP_SSIP);
+}
+
+void Riscv::handleHardware()
+{
+    // interrupt: yes; cause code: supervisor external interrupt (PLIC; could be keyboard)
+    static int IRQ_CONSOLE = 10;
+    int irq = plic_claim();
+    if (irq == IRQ_CONSOLE)
+    {
+        volatile char status = *((char*)CONSOLE_STATUS);
+        while (status & CONSOLE_RX_STATUS_BIT){
+            char c = (*(char*)CONSOLE_RX_DATA);
+            bufin->kernel_put(c);
+            status = *((char*)CONSOLE_STATUS);
+        }
+    }
+    plic_complete(irq);
 }
 
 using Body = void(*)(void*);
@@ -152,51 +189,33 @@ uint64 Riscv::syscall(uint64 *args)
 
 void Riscv::handleSupervisorTrap()
 {
-    // argumenti se ovde učitavaju jer if-ovi pregaze neke registre (npr. a3,a4)
+    // argumenti se ovde učitavaju iz registara jer if-ovi ponekad pregaze neke registre (npr. a3,a4)
     uint64 args[5];
     loadParams(args);
 
     uint64 scause = r_scause();
-    if (scause == ECALL_USER || scause == ECALL_SUPER)
+    if (scause == ECALL_USER || scause == ECALL_SUPER) // u pitanju je sistemski poziv (ecall) iz korisničkog ili privilegovanog režima.
     {
-        // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
+        /*
+         * Povratni PC nakon ecall-a je adresa instrukcije ecall-a.
+         * Zato moramo da pomerimo PC na sledeću instrukciju; Kada ne bi ovo uradili, završili bi
+         * u beskonačnoj petlji pozivanja ecall-a.
+         */
         uint64 sepc = r_sepc() + 4;
 
-        w_retval(syscall(args));
-        w_sepc(sepc);
+        w_retval(syscall(args)); // u a0 upisujemo rezultat sistemskog poziva
+        w_sepc(sepc); // upisujemo povratni PC
     }
-    else if (scause == SOFTWARE)
+    else if (scause == SOFTWARE) // u pitanju je prekid tajmera (u dokumentaciji softverski prekid)
     {
-        // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
-        TCB::timeSliceCounter++;
-        sleeplist.tick(); // proverava da li je vreme da se neke niti probude, i ako jeste budi ih
-        if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
-        {
-            uint64 sepc = r_sepc();
-            TCB::dispatch();
-            w_sepc(sepc);
-        }
-        mc_sip(SIP_SSIP);
+        handleTimer();
     }
-    else if (scause == HARDWARE)
+    else if (scause == HARDWARE) // u pitanju je prekid sa tastature
     {
-        // interrupt: yes; cause code: supervisor external interrupt (PLIC; could be keyboard)
-        static int IRQ_CONSOLE = 10;
-        int irq = plic_claim();
-        if (irq == IRQ_CONSOLE)
-        {
-            volatile char status = *((char*)CONSOLE_STATUS);
-            while (status & CONSOLE_RX_STATUS_BIT){
-                char c = (*(char*)CONSOLE_RX_DATA);
-                bufin->kernel_put(c);
-                status = *((char*)CONSOLE_STATUS);
-            }
-        }
-        plic_complete(irq);
+        handleHardware();
     }
     else
     {
-        // unexpected trap cause
-        unexpectedTrap();
+        handleUnexpectedTrap();
     }
 }

@@ -26,7 +26,7 @@ public:
 
     static int size();
 
-    static void flush_user_threads();
+    static void flush_user_threads(); // Izbacuje sve niti koje je korisnik napravio iz scheduler-a (nasilno ih gasi)
 };
 
 #endif //_scheduler_hpp

@@ -17,24 +17,21 @@ public:
 
     void operator delete(void *ptr) { __mem_free(ptr); }
 
-private:
-    List<TCB> waiting;
-
-    int val;
-
-    bool closed;
-
     _sem(sem_t *handle, unsigned init);
 
+    // oslobađa sve niti sa semafora i onemogućava dalje korišćenje semafora
     int close();
 
     int wait();
 
     int signal();
 
-    friend class Riscv;
+private:
+    List<TCB> waiting;
 
-    friend class _buffer;
+    int val;
+
+    bool closed;
 };
 
 #endif //__sem_hpp

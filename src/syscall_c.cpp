@@ -5,12 +5,14 @@
 #include "../h/syscall_c.h"
 #include "../h/opcodes.hpp"
 
+// postavlja kod sis. poziva u registar a0 i prouzrokuje prekid uz ecall
 inline void invoke(uint64 opcode)
 {
     __asm__ volatile ("mv a0, %0" : : "r" (opcode));
     __asm__ volatile ("ecall");
 }
 
+// učitava parmetre sistemskog poziva
 inline void load_args()
 {
     __asm__ volatile ("mv a4, a3");
@@ -19,6 +21,7 @@ inline void load_args()
     __asm__ volatile ("mv a1, a0");
 }
 
+// uzima povratnu vrednost sistemskog poziva iz registra a0
 inline uint64 retval()
 {
     uint64 volatile ret;
@@ -75,6 +78,7 @@ int thread_create(thread_t *handle, void (*start_routine)(void*), void *arg)
     return thread_create_helper(handle, start_routine, arg, stack);
 }
 
+// Nije zadato zadatkom, ali nam je zbog C++ API (Thread.start()) potreban način da napravimo nit bez da je pokrenemo.
 int thread_prepare(thread_t *handle, void (*start_routine)(void*), void *arg)
 {
     if (!handle) { return -1; }
@@ -102,8 +106,8 @@ void thread_dispatch()
     invoke(THREAD_DISPATCH);
 }
 
-// ovo nije zadato zadatkom, ali u C++ API postoji ~Thread() destruktor koji ne znam kako drugačije da se odradi.
-// u suštini thread_delete briše nit. u slučaju da nit i dalje radi, nedefinisano je ponašanje
+// Ovo nije zadato zadatkom, ali u C++ API postoji ~Thread() destruktor koji ne znam kako drugačije da se odradi.
+// U suštini thread_delete() briše nit. U slučaju da nit i dalje radi, nedefinisano je ponašanje
 int thread_delete(thread_t handle)
 {
     if (!handle) { return -1; }
