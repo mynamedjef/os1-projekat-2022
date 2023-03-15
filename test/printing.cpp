@@ -93,7 +93,7 @@ void printHexa(uint64 xx, uint padding)
     putc('0'); putc('x');
 
     int i = 0;
-    while (i < 16 && buffer[i] == '0') i++;
+    while (i < 15 && buffer[i] == '0') i++;
 
     int len = 16 - i;
     int diff = padding - len;
