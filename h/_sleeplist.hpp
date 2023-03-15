@@ -10,34 +10,34 @@
 struct SleepNode {
     TCB *tcb;
     time_t timeout;
+
     SleepNode(TCB *_tcb, time_t _timeout) : tcb(_tcb), timeout(_timeout) { }
-    
+
     void *operator new(size_t size) { return __mem_alloc(size); }
+
     void operator delete(void *ptr) { __mem_free(ptr); }
 };
 
 class _sleeplist : public List<SleepNode> {
 public:
-    static void insert(SleepNode *s);
+    _sleeplist() : passed(0), total_passed(0) { }
 
-    static void insert(TCB *tcb, time_t timeout);
+    void insert(SleepNode *s);
 
-    static void tick();
-    
-    static _sleeplist Sleeping;
+    void insert(TCB *tcb, time_t timeout);
+
+    void tick();
 
 private:
-    static bool Comparator(SleepNode *t1, SleepNode *t2) { return t1->timeout < t2->timeout; }
+    bool Comparator(SleepNode *t1, SleepNode *t2) { return t1->timeout < t2->timeout; }
 
-    static TCB *pop();
+    TCB *pop();
 
-    static SleepNode *pop_node();
+    time_t passed;
 
-    static time_t passed;
-    
-    static time_t total_passed;
-    
-    static bool ready();
+    time_t total_passed;
+
+    bool ready();
 };
 
 #endif //__sleeplist_hpp

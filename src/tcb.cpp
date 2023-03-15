@@ -148,7 +148,7 @@ int TCB::sleep(time_t timeout)
         return -1;
     }
     running->status = SLEEPING;
-    _sleeplist::insert(running, timeout);
+    Riscv::sleeplist.insert(running, timeout);
     dispatch();
     return 0;
 }

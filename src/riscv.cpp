@@ -11,6 +11,8 @@ _buffer *Riscv::bufin = nullptr;
 
 _buffer *Riscv::bufout = nullptr;
 
+_sleeplist Riscv::sleeplist;
+
 void Riscv::init()
 {
     bufin = new _buffer;
@@ -167,7 +169,7 @@ void Riscv::handleSupervisorTrap()
     {
         // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
         TCB::timeSliceCounter++;
-        _sleeplist::tick(); // proverava da li je vreme da se neke niti probude, i ako jeste budi ih
+        sleeplist.tick(); // proverava da li je vreme da se neke niti probude, i ako jeste budi ih
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {
             uint64 sepc = r_sepc();

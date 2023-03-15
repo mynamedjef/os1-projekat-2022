@@ -7,6 +7,7 @@
 
 #include "../lib/hw.h"
 #include "../h/_buffer.hpp"
+#include "../h/_sleeplist.hpp"
 
 class Riscv
 {
@@ -85,6 +86,8 @@ public:
     static _buffer *bufin, *bufout;
 
     static void init();
+
+    static _sleeplist sleeplist;
 
 private:
 
