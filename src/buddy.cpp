@@ -199,7 +199,7 @@ int buddy::buddy_free(void *loc, size_t size)
     while (true)
     {
         // označavamo čvor kao slobodan
-        is_used[idx] = FREE;
+        flip_is_used(idx, FREE);
 
         uint64 buddy_idx = SIBLING(idx);
 
@@ -241,7 +241,7 @@ int buddy::buddy_free_recursive(void *loc, size_t size)
         return 2;
     }
 
-    is_used[idx] = FREE;
+    flip_is_used(idx, FREE);
     uint64 buddy_idx = SIBLING(idx);
     if (bucket == 0 || is_used[buddy_idx] != FREE)
     {

@@ -1,3 +1,7 @@
+#include "../h/slab.hpp"
+#include "../h/buddy.hpp"
+#include "../h/tcb.hpp"
+
 //#include "../test/Threads_C_API_test.hpp" // zadatak 2, niti C API i sinhrona promena konteksta
 //#include "../test/Threads_CPP_API_test.hpp" // zadatak 2., niti CPP API i sinhrona promena konteksta
 
@@ -9,7 +13,16 @@
 
 extern void os2_usermain1();
 
-void userMain() {
+void os2_usermain1_wrapper()
+{
+    os2_usermain1();
+    kmem_cache_shrink(TCB::stack_cachep);
+    kmem_all_caches_info();
+    buddy::print();
+}
+
+void userMain()
+{
     //Threads_C_API_test(); // zadatak 2., niti C API i sinhrona promena konteksta
     //Threads_CPP_API_test(); // zadatak 2., niti CPP API i sinhrona promena konteksta
 
@@ -18,4 +31,6 @@ void userMain() {
 
     //testSleeping(); // thread_sleep test C API
     //ConsumerProducerCPP::testConsumerProducer(); // zadatak 4. CPP API i asinhrona promena konteksta, kompletan test svega
+
+    //os2_usermain1_wrapper();
 }

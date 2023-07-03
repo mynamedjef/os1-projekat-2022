@@ -11,6 +11,9 @@ extern void os2_usermain2(); // pošto se pokreće u sistemskom modu
 
 extern void userMain();
 
+// testiranje 2. testa za os2
+const bool TEST_OS2_2 = false;
+
 void user_wrapper(void *sem)
 {
     printString("userMain() started\n");
@@ -19,22 +22,8 @@ void user_wrapper(void *sem)
     sem_signal((sem_t)sem);
 }
 
-int main()
+void wait_for_user_main()
 {
-    kmem_init((void*)HEAP_START_ADDR, (void*)HEAP_END_ADDR);
-
-    Riscv::init();
-
-    TCB::kernelThread();
-    TCB::idleThread();
-    TCB::outputThread();
-
-    Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
-    Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
-
-    printString("main() started\n");
-
-    // paljenje korisnika
     sem_t user_sem;
     sem_open(&user_sem, 0);
 
@@ -44,13 +33,46 @@ int main()
     // čekanje korisnika
     sem_wait(user_sem);
 
+    // oslobađamo userMain() nit
+    delete user;
+    // oslobađamo semafor na kome je glavna kernel nit čekala korisnika
+    delete user_sem;
+}
+
+int main()
+{
+    kmem_init((void*)HEAP_START_ADDR, (void*)HEAP_END_ADDR);
+
+    Riscv::init();
+
+    // pravljenje potrebnih sistemskih niti
+    TCB::kernelThread();
+    TCB::idleThread();
+    TCB::outputThread();
+
+    // Riscv::supervisorTrap se izvršava u slučaju prekida
+    Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
+    // omogućavaju se prekidi
+    Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
+
+    printString("main() started\n");
+
+    if (!TEST_OS2_2) {
+        // paljenje korisnika i čekanje da završi
+        wait_for_user_main();
+    } else {
+        os2_usermain2();
+    }
+
     // onemogućavamo prekide od tajmera za slučaj da je neka korisnička nit zalutala
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
     // u slučaju da nakon userMain() neka korisnička nit nije završila, nasilno je gasimo
     Scheduler::flush_user_threads();
 
     printString("main() cleaning up\n");
-    while (Riscv::bufout->count() > 0) { thread_dispatch(); } // čekanje da se ispiše sve iz bafera ako već nije
+
+    // čekanje da se ispiše sve iz bafera ako već nije
+    while (Riscv::bufout->count() > 0) { thread_dispatch(); }
 
     // oslobađanje sve memorije
     kmem_buffers_destroy();

@@ -421,8 +421,9 @@ void kmem_cache_info(kmem_cache_t *cachep)
     printString("empty: ");
     for (kmem_slab_t *curr = cachep->empty; curr; curr = curr->next) { printHexa((uint64)curr); putc(' '); } putc('\n');
     //*/
-    printString("Veličina jednog objekta: "); printInt(cachep->obj_size); putc('\n');
-    printString("Veličina celog keša: "); printInt(block_cnt); printString(" blok(ova)\n");
+    printString("Veličina jednog objekta: "); printInt(cachep->obj_size); putc('B'); putc('\n');
+    printString("Veličina celog keša: "); printInt(block_cnt); printString(" blok(ova)");
+    printString(" ["); printInt(slab_cnt * cachep->slab_size); printString("B]\n");
     printString("Broj ploča: "); printInt(slab_cnt); putc('\n');
     printString("Broj objekata u jednoj ploči: "); printInt(max_objects(cachep)); putc('\n');
     if (slab_cnt != 0)
